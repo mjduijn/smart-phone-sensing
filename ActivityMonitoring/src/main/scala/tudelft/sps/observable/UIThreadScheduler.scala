@@ -8,8 +8,6 @@ import scala.concurrent.duration._
 import android.app.Activity
 
 object UIThreadScheduler {
-
-  //@implicitNotFound("Could not find an Activity")
   def apply(activity:Activity): Scheduler = javaSchedulerToScalaScheduler(new rx.Scheduler {
 
     implicit def actionToRunnable(action: => Unit): Runnable = new Runnable { override def run(): Unit = action }

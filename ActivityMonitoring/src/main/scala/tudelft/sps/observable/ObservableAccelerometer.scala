@@ -24,7 +24,6 @@ trait ObservableAccelerometer extends Activity with SensorEventListener{
   abstract override def onResume(): Unit = {
     super.onResume()
     sensorManager.registerListener(this, accelleroMeter, SensorManager.SENSOR_DELAY_GAME)
-
   }
 
   abstract override def onPause(): Unit = {
