@@ -1,8 +1,8 @@
-package tudelft.sps.monitoring
+package tudelft.sps.observable
 
 import android.app.Activity
 import android.content.Context
-import android.hardware.{SensorEvent, SensorEventListener, Sensor, SensorManager}
+import android.hardware.{Sensor, SensorEvent, SensorEventListener, SensorManager}
 import android.os.Bundle
 import rx.lang.scala.Observable
 import rx.lang.scala.subjects.PublishSubject
@@ -10,7 +10,7 @@ import rx.lang.scala.subjects.PublishSubject
 trait ObservableAccelerometer extends Activity with SensorEventListener{
 
   private val sensorChangedSubject = PublishSubject[SensorEvent]()
-  val sensorChangedObservable:Observable[SensorEvent] = sensorChangedSubject
+  val accelerometer:Observable[SensorEvent] = sensorChangedSubject
 
   private var sensorManager:SensorManager = null
   private var accelleroMeter:Sensor = null
