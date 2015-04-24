@@ -9,4 +9,14 @@
         android:text="djkdsjkalsd"
         android:gravity="center_horizontal" />
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:id="@+id/activity_guess"
+        android:layout_below="@+id/accelerometer_value"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="78dp"
+        android:gravity="center_horizontal" />
+
 </RelativeLayout>
