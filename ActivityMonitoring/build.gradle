@@ -65,4 +65,8 @@ dependencies {
     //Rx
     compile "io.reactivex:rxscala_2.11:0.24.1"
     compile 'com.github.PhilJay:MPAndroidChart:v2.0.9'
+
+    //Graph
+//    compile 'com.jjoe64:graphview:4.0.0'
+    compile "com.androidplot:androidplot-core:0.6.1"
 }

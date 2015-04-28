@@ -2,11 +2,16 @@ package tudelft.sps.monitoring
 
 import android.app.Activity
 import android.os.Bundle
+import android.util.Log
 import android.widget.TextView
+import com.androidplot.xy.{LineAndPointFormatter, SimpleXYSeries, XYSeries, XYPlot}
+import rx.lang.scala.Observable
 import scala.concurrent.duration._
 import tudelft.sps.observable.{UIThreadScheduler, ObservableAccelerometer}
+import scala.collection.JavaConverters._
 
 class MonitoringActivity extends Activity with ObservableAccelerometer {
+
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_hello)
@@ -34,12 +39,18 @@ class MonitoringActivity extends Activity with ObservableAccelerometer {
         findViewById(R.id.activity_guess).asInstanceOf[TextView].setText(guess)
       }
 
-//    val chart = findViewById(R.id.chart).asInstanceOf[ScatterChart]
+    val plot = findViewById(R.id.mySimpleXYPlot).asInstanceOf[XYPlot]
+    val series1 = new SimpleXYSeries("Series 1")
+    plot.addSeries(series1, new LineAndPointFormatter())
 
-//    val dataSet = new ScatterDataSet()
-    accelerometer.subscribe{ next =>
-//      dataSource.push((next.values(0), next.values(2)))
-
-    }
+    accelerometerSum
+      .map(i => i: java.lang.Float)
+      .slidingBuffer(20, 1)
+      .observeOn(UIThreadScheduler(this))
+      .subscribe((b) => {
+        series1.setModel(b.asJava, SimpleXYSeries.ArrayFormat.Y_VALS_ONLY)
+        plot.redraw()
+      })
   }
+
 }
