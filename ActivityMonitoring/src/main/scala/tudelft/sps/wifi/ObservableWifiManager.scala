@@ -23,19 +23,27 @@ trait ObservableWifiManager extends Activity{
     wifiManager = getSystemService(Context.WIFI_SERVICE).asInstanceOf[WifiManager]
   }
 
-  private class WifiReceiver extends BroadcastReceiver{
+  override def onResume(): Unit = {
+    super.onResume()
+    registerReceiver(WifiBroadcastReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))
+  }
+
+  override def onPause(): Unit = {
+    super.onPause()
+    unregisterReceiver(WifiBroadcastReceiver)
+  }
+
+  object WifiBroadcastReceiver extends BroadcastReceiver{
     override def onReceive(ctx: Context, intent: Intent): Unit = {
       Log.d(TAG, "Wifi Scan completed")
       val results = JavaConversions.asScalaBuffer(wifiManager.getScanResults())
         .map(result => WifiSignal(result.BSSID, result.SSID, result.frequency, result.level))
       wifiScansSubject.onNext(results)
-      unregisterReceiver(this)
     }
   }
 
   def startWifiscan(): Unit ={
     Log.d(TAG, "Starting Wifi scan..")
     wifiManager.startScan()
-    registerReceiver(new WifiReceiver(), new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))
   }
 }

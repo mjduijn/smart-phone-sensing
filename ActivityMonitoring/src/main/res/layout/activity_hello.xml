@@ -19,6 +19,7 @@
         android:gravity="center_horizontal"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="second"
+
     />
     <com.androidplot.xy.XYPlot
         android:id="@+id/mySimpleXYPlot"
@@ -40,9 +41,9 @@
         androidPlot.graphWidget.domainLabelPaint.textSize="@dimen/domain_tick_label_font_size"
         androidPlot.graphWidget.domainOriginLabelPaint.textSize="@dimen/domain_tick_label_font_size"
         androidPlot.legendWidget.textPaint.textSize="@dimen/legend_text_font_size"
-        androidPlot.legendWidget.iconSizeMetrics.heightMetric.value="15dp"
-        androidPlot.legendWidget.iconSizeMetrics.widthMetric.value="15dp"
-        androidPlot.legendWidget.heightMetric.value="25dp"
+        androidPlot.legendWidget.iconSizeMetrics.heightMetric.value="15"
+        androidPlot.legendWidget.iconSizeMetrics.widthMetric.value="15"
+        androidPlot.legendWidget.heightMetric.value="25"
         androidPlot.legendWidget.positionMetrics.anchor="right_bottom"
         androidPlot.graphWidget.gridLinePaint.color="#000000"/>
 
