@@ -1,0 +1,41 @@
+package tudelft.sps.wifi
+
+import android.app.Activity
+import android.content.{IntentFilter, Intent, Context, BroadcastReceiver}
+import android.net.wifi.WifiManager
+import android.os.Bundle
+import android.util.Log
+import rx.lang.scala.Observable
+import rx.lang.scala.subjects.PublishSubject
+
+import scala.collection.JavaConversions
+
+trait ObservableWifiManager extends Activity{
+  val TAG = "ObservableWifiManager"
+
+  private val wifiScansSubject = PublishSubject[Seq[WifiSignal]]()
+  val wifiScans:Observable[Seq[WifiSignal]] = wifiScansSubject
+
+  private var wifiManager:WifiManager = null
+
+  abstract override def onCreate(savedInstanceState: Bundle): Unit = {
+    super.onCreate(savedInstanceState)
+    wifiManager = getSystemService(Context.WIFI_SERVICE).asInstanceOf[WifiManager]
+  }
+
+  private class WifiReceiver extends BroadcastReceiver{
+    override def onReceive(ctx: Context, intent: Intent): Unit = {
+      Log.d(TAG, "Wifi Scan completed")
+      val results = JavaConversions.asScalaBuffer(wifiManager.getScanResults())
+        .map(result => WifiSignal(result.BSSID, result.SSID, result.frequency, result.level))
+      wifiScansSubject.onNext(results)
+      unregisterReceiver(this)
+    }
+  }
+
+  def startWifiscan(): Unit ={
+    Log.d(TAG, "Starting Wifi scan..")
+    wifiManager.startScan()
+    registerReceiver(new WifiReceiver(), new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))
+  }
+}

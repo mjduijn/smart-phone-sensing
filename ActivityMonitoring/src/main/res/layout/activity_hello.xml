@@ -23,7 +23,8 @@
     <com.androidplot.xy.XYPlot
         android:id="@+id/mySimpleXYPlot"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
         androidPlot.title="A Simple XY Plot"
         androidPlot.domainLabel="Domain"
         androidPlot.rangeLabel="Range"
@@ -48,7 +49,8 @@
     <ListView
         android:id="@+id/signals"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
     />
 
 </LinearLayout>
