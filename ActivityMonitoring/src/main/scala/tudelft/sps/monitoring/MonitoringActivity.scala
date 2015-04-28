@@ -28,10 +28,18 @@ class MonitoringActivity extends Activity with ObservableAccelerometer {
       }
 
     accelerometerSum
-      .map(sum => if(sum > 15) "Walking" else "Queueing")
+      .map(sum => if(sum > 3) "Walking" else "Queueing")
       .observeOn(UIThreadScheduler(this))
       .subscribe{guess =>
         findViewById(R.id.activity_guess).asInstanceOf[TextView].setText(guess)
       }
+
+//    val chart = findViewById(R.id.chart).asInstanceOf[ScatterChart]
+
+//    val dataSet = new ScatterDataSet()
+    accelerometer.subscribe{ next =>
+//      dataSource.push((next.values(0), next.values(2)))
+
+    }
   }
 }

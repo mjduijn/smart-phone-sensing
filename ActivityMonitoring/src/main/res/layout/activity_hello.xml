@@ -1,22 +1,29 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
 
     <TextView
         android:id="@+id/accelerometer_value"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="djkdsjkalsd"
-        android:gravity="center_horizontal" />
+        android:gravity="center_horizontal"
+        android:text="first"
+    />
 
     <TextView
+        android:id="@+id/activity_guess"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:id="@+id/activity_guess"
-        android:layout_below="@+id/accelerometer_value"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="78dp"
-        android:gravity="center_horizontal" />
+        android:text="second"
+    />
+    <ListView
+        android:id="@+id/signals"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+    />
 
-</RelativeLayout>
+</LinearLayout>

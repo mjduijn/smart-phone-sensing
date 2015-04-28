@@ -18,7 +18,7 @@ trait ObservableAccelerometer extends Activity with SensorEventListener{
   abstract override def onCreate(savedInstanceState: Bundle): Unit = {
     super.onCreate(savedInstanceState)
     this.sensorManager = getSystemService(Context.SENSOR_SERVICE).asInstanceOf[SensorManager]
-    this.accelleroMeter = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+    this.accelleroMeter = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
   }
 
   abstract override def onResume(): Unit = {

@@ -11,6 +11,9 @@ buildscript {
 
 repositories {
     jcenter()
+    maven {
+        url "https://jitpack.io"
+    }
 }
 
 apply plugin: "com.android.application"
@@ -61,4 +64,5 @@ dependencies {
 
     //Rx
     compile "io.reactivex:rxscala_2.11:0.24.1"
+    compile 'com.github.PhilJay:MPAndroidChart:v2.0.9'
 }
