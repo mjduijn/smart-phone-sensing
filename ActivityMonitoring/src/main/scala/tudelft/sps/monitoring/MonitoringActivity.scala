@@ -44,7 +44,8 @@ class MonitoringActivity extends Activity with ObservableAccelerometer {
     plot.addSeries(series1, new LineAndPointFormatter())
 
     accelerometerSum
-      .map(i => i: java.lang.Float)
+      .filter(f => !f.isNaN)
+      .map(f => f: java.lang.Float)
       .slidingBuffer(20, 1)
       .observeOn(UIThreadScheduler(this))
       .subscribe((b) => {
