@@ -67,6 +67,5 @@ dependencies {
     compile 'com.github.PhilJay:MPAndroidChart:v2.0.9'
 
     //Graph
-//    compile 'com.jjoe64:graphview:4.0.0'
     compile "com.androidplot:androidplot-core:0.6.1"
 }

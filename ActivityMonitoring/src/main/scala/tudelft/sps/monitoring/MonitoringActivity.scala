@@ -9,6 +9,10 @@ import rx.lang.scala.Observable
 import scala.concurrent.duration._
 import tudelft.sps.observable.{UIThreadScheduler, ObservableAccelerometer}
 import scala.collection.JavaConverters._
+import android.widget.{ListView, TextView}
+import tudelft.sps.lib.widget.FunctionalListAdapter
+import scala.concurrent.duration._
+import tudelft.sps.observable.{ObservingListAdapter, UIThreadScheduler, ObservableAccelerometer}
 
 class MonitoringActivity extends Activity with ObservableAccelerometer {
 
@@ -52,6 +56,21 @@ class MonitoringActivity extends Activity with ObservableAccelerometer {
         series1.setModel(b.asJava, SimpleXYSeries.ArrayFormat.Y_VALS_ONLY)
         plot.redraw()
       })
+
+    val adapter = ObservingListAdapter[(String, String), (TextView, TextView)](getApplicationContext(), R.layout.signal_item){
+      //for efficiency: findViewById is very expensive if it has to be done for each element, so these references are cached with this method
+      view => (view.findViewById(R.id.mac).asInstanceOf[TextView], view.findViewById(R.id.rssi).asInstanceOf[TextView])
+    }{ (holder, element) => //updates the view for the current element, using the viewholder
+      holder._1.setText(element._1)
+      holder._2.setText(element._2)
+    }
+
+    accelerometerSum
+      .map(value => List(("value is ", value.toString())))
+      .observeOn(UIThreadScheduler(this))
+      .subscribe(adapter.onNext)
+
+    findViewById(R.id.signals).asInstanceOf[ListView].setAdapter(adapter)
   }
 
 }
