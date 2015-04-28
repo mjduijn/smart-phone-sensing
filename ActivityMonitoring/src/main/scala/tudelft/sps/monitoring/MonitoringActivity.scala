@@ -35,20 +35,20 @@ class MonitoringActivity extends Activity
           buffer.map(event => Math.abs(event.values(1))).sum +
           buffer.map(event => Math.abs(event.values(2))).sum
         ) / buffer.length
-    }
+      }
 
     accelerometerSum
       .observeOn(UIThreadScheduler(this))
       .subscribeManaged{x =>
-      findViewById(R.id.accelerometer_value).asInstanceOf[TextView].setText("Accelerometer: %.2f".format(x))
-    }
+        findViewById(R.id.accelerometer_value).asInstanceOf[TextView].setText("Accelerometer: %.2f".format(x))
+      }
 
     accelerometerSum
       .map(sum => if(sum > 3) "Walking" else "Queueing")
       .observeOn(UIThreadScheduler(this))
       .subscribeManaged{guess =>
-      findViewById(R.id.activity_guess).asInstanceOf[TextView].setText(guess)
-    }
+        findViewById(R.id.activity_guess).asInstanceOf[TextView].setText(guess)
+      }
 
     val plot = findViewById(R.id.mySimpleXYPlot).asInstanceOf[XYPlot]
     val series1 = new SimpleXYSeries("Series 1")
@@ -59,10 +59,10 @@ class MonitoringActivity extends Activity
       .map(f => f: java.lang.Float)
       .slidingBuffer(20, 1)
       .observeOn(UIThreadScheduler(this))
-      .subscribeManaged((b) => {
-      series1.setModel(b.asJava, SimpleXYSeries.ArrayFormat.Y_VALS_ONLY)
-      plot.redraw()
-    })
+      .subscribeManaged { b =>
+        series1.setModel(b.asJava, SimpleXYSeries.ArrayFormat.Y_VALS_ONLY)
+        plot.redraw()
+      }
 
     val adapter = ObservingListAdapter[WifiSignal, (TextView, TextView)](getApplicationContext(), R.layout.signal_item){
       //for efficiency: findViewById is very expensive if it has to be done for each element, so these references are cached with this method

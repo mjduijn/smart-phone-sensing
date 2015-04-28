@@ -6,14 +6,14 @@ import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.util.Log
 import rx.lang.scala.Observable
-import rx.lang.scala.subjects.PublishSubject
+import rx.lang.scala.subjects.BehaviorSubject
 
 import scala.collection.JavaConversions
 
 trait ObservableWifiManager extends Activity{
   val TAG = "ObservableWifiManager"
 
-  private val wifiScansSubject = PublishSubject[Seq[WifiSignal]]()
+  private val wifiScansSubject = BehaviorSubject[Seq[WifiSignal]]()
   val wifiScans:Observable[Seq[WifiSignal]] = wifiScansSubject
 
   private var wifiManager:WifiManager = null
