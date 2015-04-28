@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.widget.{ListView, TextView}
 import tudelft.sps.lib.widget.FunctionalListAdapter
 import scala.concurrent.duration._
-import tudelft.sps.observable.{UIThreadScheduler, ObservableAccelerometer}
+import tudelft.sps.observable.{ObservingListAdapter, UIThreadScheduler, ObservableAccelerometer}
 
 class MonitoringActivity extends Activity with ObservableAccelerometer {
   override def onCreate(savedInstanceState: Bundle) {
@@ -35,16 +35,18 @@ class MonitoringActivity extends Activity with ObservableAccelerometer {
         findViewById(R.id.activity_guess).asInstanceOf[TextView].setText(guess)
       }
 
-    //values that are being displayed
-    val seq = scala.collection.mutable.IndexedSeq[(String, String)]((for(i <- 1 to 1000) yield ("MAC" + i, "RSSI" + i)):_*)
-
-    val adapter = FunctionalListAdapter[(String, String), (TextView, TextView)](seq, getApplicationContext(), R.layout.signal_item){
+    val adapter = ObservingListAdapter[(String, String), (TextView, TextView)](getApplicationContext(), R.layout.signal_item){
       //for efficiency: findViewById is very expensive if it has to be done for each element, so these references are cached with this method
       view => (view.findViewById(R.id.mac).asInstanceOf[TextView], view.findViewById(R.id.rssi).asInstanceOf[TextView])
     }{ (holder, element) => //updates the view for the current element, using the viewholder
       holder._1.setText(element._1)
       holder._2.setText(element._2)
     }
+
+    accelerometerSum
+      .map(value => List(("value is ", value.toString())))
+      .observeOn(UIThreadScheduler(this))
+      .subscribe(adapter.onNext)
 
     findViewById(R.id.signals).asInstanceOf[ListView].setAdapter(adapter)
   }

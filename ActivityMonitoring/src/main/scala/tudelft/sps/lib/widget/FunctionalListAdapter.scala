@@ -1,12 +1,17 @@
 package tudelft.sps.lib.widget
 
 import android.content.Context
-import android.util.Log
 import android.view.{LayoutInflater, View, ViewGroup}
 import android.widget.BaseAdapter
 
 trait FunctionalListAdapter[A <: AnyRef, B] extends BaseAdapter{
-  protected var seq:scala.collection.mutable.IndexedSeq[A]
+  type SequenceType <: {
+    def apply(index:Int): A
+    def size:Int
+  }
+
+  protected var seq: SequenceType
+
   val ctx:Context
   val layoutId:Int
   val viewHolderBuilder: (View) => B
@@ -37,8 +42,9 @@ trait FunctionalListAdapter[A <: AnyRef, B] extends BaseAdapter{
 }
 
 object FunctionalListAdapter{
-  def apply[A <: AnyRef, B](_seq:scala.collection.mutable.IndexedSeq[A], _ctx:Context, _layoutId:Int)(_viewHolderBuilder: View => B)(_viewBuilder: (B, A) => Unit) = new FunctionalListAdapter[A, B] {
-    override var seq = _seq
+  def apply[A <: AnyRef, B](_seq:scala.collection.mutable.Buffer[A], _ctx:Context, _layoutId:Int)(_viewHolderBuilder: View => B)(_viewBuilder: (B, A) => Unit): FunctionalListAdapter[A,B] = new FunctionalListAdapter[A, B] {
+    override type SequenceType = scala.collection.mutable.Buffer[A]
+    override var seq:SequenceType = _seq
     override val ctx = _ctx
     override val layoutId = _layoutId
     override val viewHolderBuilder = _viewHolderBuilder
