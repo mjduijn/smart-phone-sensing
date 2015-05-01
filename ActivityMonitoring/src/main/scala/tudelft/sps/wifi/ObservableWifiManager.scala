@@ -11,7 +11,7 @@ import rx.lang.scala.subjects.BehaviorSubject
 import scala.collection.JavaConversions
 
 trait ObservableWifiManager extends Activity{
-  val TAG = "ObservableWifiManager"
+  private val TAG = "ObservableWifiManager"
 
   private val wifiScansSubject = BehaviorSubject[Seq[WifiSignal]]()
   val wifiScans:Observable[Seq[WifiSignal]] = wifiScansSubject

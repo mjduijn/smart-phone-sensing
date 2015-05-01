@@ -1,9 +1,14 @@
 package tudelft.sps.lib
 
+import java.io.File
+
 import android.content.{ContentValues, Context}
 import android.database.Cursor
 import android.database.sqlite.{SQLiteDatabase, SQLiteOpenHelper}
+import android.os.Environment
+import android.util.Log
 import rx.lang.scala.Observable
+import scala.concurrent.ExecutionContext.Implicits._
 
 /**
  * following is an example of how the database works:
@@ -32,6 +37,7 @@ import rx.lang.scala.Observable
 
  */
 package object db{
+  private val TAG = "db"
   abstract class Put[A](val putF: ContentValues => Unit)
 
   case class PutInt(key:String, value:Int) extends Put[Int](_.put(key, value.asInstanceOf[java.lang.Integer]))
@@ -92,18 +98,21 @@ package object db{
         while(cursor.moveToNext()){
           sub.onNext(mapping(selector))
         }
+        sub.onCompleted()
       }
     }
   }
 
-
-
   trait ObservableDBHelper extends SQLiteOpenHelper{
-    val dbCreateQuery:String
+    val dbCreateQuery:Seq[String]
     val ctx:Context
 
     abstract override def onCreate(db: SQLiteDatabase): Unit = {
-      db.execSQL(dbCreateQuery)
+      db.transaction{
+        for(q <- dbCreateQuery){
+          db.execSQL(q)
+        }
+      }
     }
 
     abstract override def onUpgrade(db: SQLiteDatabase, p2: Int, p3: Int): Unit = {
@@ -111,14 +120,24 @@ package object db{
   }
 
   object ObservableDBHelper {
-    private class ConcreteSQLiteOpenHelper(ctx:Context, dbName:String, dbVersion:Int) extends SQLiteOpenHelper(ctx, dbName, null, dbVersion){
+
+    private class ConcreteSQLiteOpenHelper(ctx: Context, dbName: String, dbVersion: Int) extends SQLiteOpenHelper(ctx, dbName, null, dbVersion) {
       override def onCreate(db: SQLiteDatabase): Unit = {}
+
       override def onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int): Unit = {}
     }
 
-    def apply(_ctx:Context, _dbName:String, _dbVersion:Int, _dbCreateQuery:String):ObservableDBHelper = new ConcreteSQLiteOpenHelper(_ctx, _dbName, _dbVersion) with ObservableDBHelper{
-      override val ctx = _ctx
-      override val dbCreateQuery = _dbCreateQuery
+    def apply(_ctx: Context, _dbName: String, _dbVersion: Int, _dbCreateQuery: Seq[String]): ObservableDBHelper = {
+      val dbFolder = new File(File.separator + "sdcard" + File.separator + "Android" + File.separator + "data" + File.separator + _ctx.getApplicationContext.getPackageName())
+      if(!dbFolder.exists()){
+        dbFolder.mkdirs()
+      }
+      val dbLocation =  dbFolder.getAbsolutePath() + File.separator + _dbName
+      new ConcreteSQLiteOpenHelper(_ctx, dbLocation, _dbVersion) with ObservableDBHelper {
+        SQLiteDatabase.openOrCreateDatabase(dbLocation, null).close()
+        override val ctx = _ctx
+        override val dbCreateQuery = _dbCreateQuery
+      }
     }
   }
 
