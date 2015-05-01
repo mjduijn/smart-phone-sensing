@@ -5,6 +5,7 @@ import android.view.{LayoutInflater, View, ViewGroup}
 import android.widget.BaseAdapter
 
 trait FunctionalListAdapter[A <: AnyRef, B] extends BaseAdapter{
+
   type SequenceType <: {
     def apply(index:Int): A
     def size:Int

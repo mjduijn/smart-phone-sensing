@@ -1,6 +1,8 @@
 package tudelft.sps.monitoring
 
 import android.app.Activity
+import android.content.ContentValues
+import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -114,6 +116,7 @@ class MonitoringActivity extends Activity
 
     learnWalkingObservable
       .combineLatestWith(accelerometerSum)((b, s) => (b, s))
+      .observeOn(UIThreadScheduler(this))
       .foreach{case (b, s) => {
         if(b) {
           btnLearnWalking.setText("Learn walking")
@@ -137,6 +140,7 @@ class MonitoringActivity extends Activity
     //Change button text
     learnQueuingObservable
       .combineLatestWith(accelerometerSum)((b, s) => (b, s))
+      .observeOn(UIThreadScheduler(this))
       .foreach{case (b, s) => {
         if(b) {
           btnLearnQueuing.setText("Learn queuing")
