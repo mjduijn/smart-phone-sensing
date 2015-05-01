@@ -39,7 +39,7 @@ class MonitoringActivity extends Activity
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_hello)
 
-    dbHelper = ObservableDBHelper.apply(this, "monitoring", 1,
+    dbHelper = ObservableDBHelper.apply(this, "monitoring.db", 1,
       Seq(
         s"""
           |CREATE TABLE $walkTable(
@@ -101,6 +101,8 @@ class MonitoringActivity extends Activity
       .flatMap{sample => if(sample.isEmpty) Observable.empty else Observable.just(sample.sortBy(x => x.magnitude).apply(sample.size / 2))} //get median
       .map(a => classifier.classify(a))
       //.doOnEach(println(_))
+      .slidingBuffer(6, 1)
+      .map(list => if(list.count(_.equals(1)) >= 2) 1 else 0)
       .map(v => if (v == 0) "Queueing" else "Walking" )
       .observeOn(UIThreadScheduler(this))
       .subscribeManaged{guess =>
@@ -143,7 +145,7 @@ class MonitoringActivity extends Activity
     val btnLearnWalking = findViewById(R.id.btn_learn_walking).asInstanceOf[Button]
 
     //Add learn walking onclick listener
-    val learnWalkingObservable = Observable((aSubscriber: Subscriber[Int]) => {
+    Observable((aSubscriber: Subscriber[Int]) => {
       btnLearnWalking.setOnClickListener(new OnClickListener {
           override def onClick(p1: View): Unit = if(!aSubscriber.isUnsubscribed) aSubscriber.onNext(1)
         //TODO deal with unsubscribe
@@ -171,7 +173,6 @@ class MonitoringActivity extends Activity
               "y" -> acc.y,
               "z" -> acc.z
             )
-
           }
         }
 
