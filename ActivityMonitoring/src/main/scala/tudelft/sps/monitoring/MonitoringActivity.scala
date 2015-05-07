@@ -18,7 +18,7 @@ import android.widget.{ListView, TextView}
 import rx.lang.scala.Observable
 import tudelft.sps.wifi.{WifiSignal, ObservableWifiManager}
 import scala.concurrent.duration._
-import tudelft.sps.statistics.{Classifier, Knn}
+import tudelft.sps.statistics.{SeqExtensions, Classifier, Knn}
 import tudelft.sps.lib.db._
 import scala.concurrent.ExecutionContext.Implicits._
 
@@ -95,40 +95,63 @@ class MonitoringActivity extends Activity
 //        findViewById(R.id.activity_guess).asInstanceOf[TextView].setText(guess)
 //      }
 
-    def stdev(xs: Seq[Acceleration]): Acceleration = {
-      val mean = xs.reduce(_ + _) / xs.length
-      val variance = xs.reduce((s, a) => s + (a - mean) * (a - mean))
-      Acceleration(Math.sqrt(variance.x).toFloat, Math.sqrt(variance.y).toFloat, Math.sqrt(variance.z).toFloat)
-    }
 
+    import SeqExtensions._
     accelerometer
-      .map(event => Acceleration(event.values(0), event.values(1), event.values(2)))
-      .slidingBuffer(100 millis, 100 millis)
+      .map(Acceleration.apply)
+      .slidingBuffer(20, 1)
 //      .flatMap{sample => if(sample.isEmpty) Observable.empty else Observable.just(sample.sortBy(x => x.magnitude).apply(sample.size / 2))} //get median
-      .flatMap{sample => if(sample.isEmpty) Observable.empty else Observable.just(stdev(sample))} //get stdev
-      .map(a => classifier.classify(a))
+      .flatMap{sample => if(sample.isEmpty) Observable.empty else Observable.just(Math.sqrt(sample.map(_.magnitude).variance))} //get stdev
+      //.map(a => classifier.classify(a))
       //.doOnEach(println(_))
-      .slidingBuffer(6, 1)
-      .map(list => if(list.count(_.equals(1)) >= 2) 1 else 0)
-      .map(v => if (v == 0) "Queueing" else "Walking" )
+//      .slidingBuffer(6, 1)
+//      .map(list => if(list.count(_.equals(1)) >= 2) 1 else 0)
+      .flatMap(v => if (v < 1) Observable.just("Queueing") else if(v > 2) Observable.just("Walking") else Observable.empty)
       .observeOn(UIThreadScheduler(this))
       .subscribeManaged{guess =>
         findViewById(R.id.activity_guess).asInstanceOf[TextView].setText(guess)
       }
 
-
+    //TODO ask if discrete time is correct
+    val tMin = 0
+    val tMax = 20
+    val updateInterval = 10
+    val autoCorrelation:Observable[Double] = accelerometer
+      .observeOn(ExecutionContextScheduler(global))
+      .map(Acceleration.apply)
+      .slidingBuffer(tMax * 2, updateInterval)
+      .map{ sample =>
+        def psi(m:Int) = {
+          val magnitude = sample.map(_.magnitude)
+          for (t_i <- tMin to (tMax - 1)) yield {
+            val mean0 = magnitude.drop(m).take(t_i).mean
+            val mean1 = magnitude.drop(m + t_i).take(t_i).mean
+            val seq = for (k <- 0 to t_i - 1) yield
+              (magnitude(m + k) - mean0) * (magnitude(m + k + t_i) - mean1)
+            seq.sum / (t_i * magnitude.drop(m).take(t_i).variance * magnitude.drop(m + t_i).take(t_i).variance)
+          }
+        }
+        Log.d(TAG, "autoCorrelation result: " + psi(0).max)
+        psi(0).max
+      }
 
     val plot = findViewById(R.id.mySimpleXYPlot).asInstanceOf[XYPlot]
     val series1 = new SimpleXYSeries("Series 1")
     plot.addSeries(series1, new LineAndPointFormatter())
 
-    accelerometerSum
-      .filter(f => !f.isNaN)
-      .map(f => f: java.lang.Float)
+    var graphObservable = accelerometer
+      //.observeOn(ExecutionContextScheduler(global))
+      .map(Acceleration.apply(_))
       .slidingBuffer(20, 1)
-      .observeOn(UIThreadScheduler(this))
+      .map(_.map(_.magnitude).variance)
+
+    graphObservable = autoCorrelation
+
+    graphObservable
+      .slidingBuffer(20, 1)
+      //.observeOn(UIThreadScheduler(this))
       .subscribeManaged { b =>
-        series1.setModel(b.asJava, SimpleXYSeries.ArrayFormat.Y_VALS_ONLY)
+        series1.setModel(b.map(_.asInstanceOf[java.lang.Double]).asJava, SimpleXYSeries.ArrayFormat.Y_VALS_ONLY)
         plot.redraw()
       }
 
@@ -172,8 +195,8 @@ class MonitoringActivity extends Activity
       .filter(_._1)
       .map{case (b, e) => Acceleration(e.values(0), e.values(1), e.values(2))}
       .slidingBuffer(500 millis, 500 millis)
-//      .flatMap{sample => if(sample.isEmpty) Observable.empty else Observable.just(sample.sortBy(x => x.magnitude).apply(sample.size / 2))} //get median
-      .flatMap{sample => if(sample.isEmpty) Observable.empty else Observable.just(stdev(sample))} //get stdev
+      .flatMap{sample => if(sample.isEmpty) Observable.empty else Observable.just(sample.sortBy(x => x.magnitude).apply(sample.size / 2))} //get median
+      //.flatMap{sample => if(sample.isEmpty) Observable.empty else Observable.just(stdev(sample))} //get stdev
       .foreach{ acc =>
         dbHelper.getWritableDatabase(){ db =>
             db.insertRow(walkTable,
@@ -209,8 +232,8 @@ class MonitoringActivity extends Activity
       .filter(_._1)
       .map{case (b, e) => Acceleration(e.values(0), e.values(1), e.values(2))}
       .slidingBuffer(500 millis, 500 millis)
-//      .flatMap{sample => if(sample.isEmpty) Observable.empty else Observable.just(sample.sortBy(x => x.magnitude).apply(sample.size / 2))} //get median
-      .flatMap{sample => if(sample.isEmpty) Observable.empty else Observable.just(stdev(sample))} //get stdev
+      .flatMap{sample => if(sample.isEmpty) Observable.empty else Observable.just(sample.sortBy(x => x.magnitude).apply(sample.size / 2))} //get median
+//      .flatMap{sample => if(sample.isEmpty) Observable.empty else Observable.just(stdev(sample))} //get stdev
       .foreach{ acc =>
       dbHelper.getWritableDatabase(){ db =>
           db.insertRow(queueTable,

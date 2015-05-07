@@ -1,5 +1,7 @@
 package tudelft.sps.data
 
+import android.hardware.SensorEvent
+
 case class Acceleration(x: Float, y: Float, z: Float){
   def distance(that: Acceleration) = {
     Math.sqrt(Math.pow(Math.abs(x) - Math.abs(that.x), 2) + Math.pow(Math.abs(y) - Math.abs(that.x), 2) + Math.pow(Math.abs(z) - Math.abs(that.z), 2)).toFloat
@@ -16,4 +18,5 @@ case class Acceleration(x: Float, y: Float, z: Float){
 
 object Acceleration{
   def empty = Acceleration(0,0,0)
+  def apply(event:SensorEvent):Acceleration = Acceleration(event.values(0), event.values(1), event.values(2))
 }
