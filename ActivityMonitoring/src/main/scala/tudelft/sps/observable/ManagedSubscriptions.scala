@@ -6,37 +6,68 @@ import rx.lang.scala.{Subscriber, Observable, Subscription, Observer}
 import scala.collection.mutable.ArrayBuffer
 
 trait ManagedSubscriptions extends Activity{
-  private val managedSubscriptions = ArrayBuffer[Subscription]()
+  private val runningSubscriptions = ArrayBuffer[Subscription]()
+  private val aliveSubscriptions = ArrayBuffer[Subscription]()
 
   abstract override def onPause(): Unit = {
     super.onPause()
-    managedSubscriptions.foreach(_.unsubscribe())
-    managedSubscriptions.clear()
+    runningSubscriptions.foreach(_.unsubscribe())
+    runningSubscriptions.clear()
+  }
+
+  abstract override def onStop(): Unit ={
+    super.onStop()
+    aliveSubscriptions.foreach(_.unsubscribe())
+    aliveSubscriptions.clear()
   }
 
   implicit class ManagedSubscriptionsObservableExtensions[A](obs:Observable[A]){
-    def subscribeManaged(onNext:A => Unit): Unit = {
-      managedSubscriptions += obs.subscribe(onNext)
+    def subscribeRunning(onNext:A => Unit): Unit = {
+      runningSubscriptions += obs.subscribe(onNext)
     }
 
-    def subscribeManaged(onNext:A => Unit, onError: Throwable => Unit): Unit = {
-      managedSubscriptions += obs.subscribe(onNext, onError)
+    def subscribeRunning(onNext:A => Unit, onError: Throwable => Unit): Unit = {
+      runningSubscriptions += obs.subscribe(onNext, onError)
     }
 
-    def subscribeManaged(onNext:A => Unit, onError: Throwable => Unit, onCompleted: () => Unit): Unit = {
-      managedSubscriptions += obs.subscribe(onNext, onError, onCompleted)
+    def subscribeRunning(onNext:A => Unit, onError: Throwable => Unit, onCompleted: () => Unit): Unit = {
+      runningSubscriptions += obs.subscribe(onNext, onError, onCompleted)
     }
 
-    def subscribeManaged(observer:Observer[A]): Unit = {
-      managedSubscriptions += obs.subscribe(observer)
+    def subscribeRunning(observer:Observer[A]): Unit = {
+      runningSubscriptions += obs.subscribe(observer)
     }
 
-    def subscribeManaged(subscriber:Subscriber[A]): Unit = {
-      managedSubscriptions += obs.subscribe(subscriber)
+    def subscribeRunning(subscriber:Subscriber[A]): Unit = {
+      runningSubscriptions += obs.subscribe(subscriber)
     }
 
-    def subscribeManaged(): Unit = {
-      managedSubscriptions += obs.subscribe()
+    def subscribeRunning(): Unit = {
+      runningSubscriptions += obs.subscribe()
+    }
+
+    def subscribeAlive(onNext:A => Unit): Unit = {
+      aliveSubscriptions += obs.subscribe(onNext)
+    }
+
+    def subscribeAlive(onNext:A => Unit, onError: Throwable => Unit): Unit = {
+      aliveSubscriptions += obs.subscribe(onNext, onError)
+    }
+
+    def subscribeAlive(onNext:A => Unit, onError: Throwable => Unit, onCompleted: () => Unit): Unit = {
+      aliveSubscriptions += obs.subscribe(onNext, onError, onCompleted)
+    }
+
+    def subscribeAlive(observer:Observer[A]): Unit = {
+      aliveSubscriptions += obs.subscribe(observer)
+    }
+
+    def subscribeAlive(subscriber:Subscriber[A]): Unit = {
+      aliveSubscriptions += obs.subscribe(subscriber)
+    }
+
+    def subscribeAlive(): Unit = {
+      aliveSubscriptions += obs.subscribe()
     }
   }
 }

@@ -3,4 +3,11 @@
 
     <string name="app_name">ActivityMonitoring</string>
 
+    <!-- Motion model activity constants -->
+    <string name="steps">Steps</string>
+    <string name="state">State</string>
+    <string name="stepInterval">Step Interval</string>
+    <string name="walking">Walking</string>
+    <string name="queueing">Queueing</string>
+    <string name="samplingRate">Sampling rate</string>
 </resources>

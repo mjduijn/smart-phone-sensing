@@ -1,15 +1,17 @@
 package tudelft.sps.statistics
 
 object SeqExtensions{
-  implicit class StatisticalIntSeqExtensions(val seq:Seq[Float]) extends AnyVal {
-    def mean = seq.sum / seq.length
-    def variance = {
+  implicit class StatisticalSeqExtensions[A](seq:Seq[A])(implicit ev:Numeric[A]) {
+
+    def mean:Double = ev.toDouble(seq.sum) / seq.size
+    def variance:Double = {
       if(seq.isEmpty) {
         0
       } else {
         val m = mean
-        Math.sqrt(seq.reduceRight[Float]((cur, acc) => Math.pow(mean - cur, 2).asInstanceOf[Float] + acc))
+        Math.sqrt(seq.foldRight[Double](0)((cur, acc) => Math.pow(mean - ev.toDouble(cur), 2) + acc))
       }
     }
+    def median:A = seq.sorted.apply(seq.size / 2)
   }
 }

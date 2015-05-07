@@ -85,7 +85,7 @@ class MonitoringActivity extends Activity
 
     accelerometerSum
       .observeOn(UIThreadScheduler(this))
-      .subscribeManaged{x =>
+      .subscribeRunning{x =>
         findViewById(R.id.accelerometer_value).asInstanceOf[TextView].setText("Accelerometer: %.2f".format(x))
       }
 
@@ -109,13 +109,13 @@ class MonitoringActivity extends Activity
 //      .map(list => if(list.count(_.equals(1)) >= 2) 1 else 0)
       .flatMap(v => if (v < 1) Observable.just("Queueing") else if(v > 2) Observable.just("Walking") else Observable.empty)
       .observeOn(UIThreadScheduler(this))
-      .subscribeManaged{guess =>
+      .subscribeRunning{guess =>
         findViewById(R.id.activity_guess).asInstanceOf[TextView].setText(guess)
       }
 
     //TODO ask if discrete time is correct
     val tMin = 0
-    val tMax = 100
+    val tMax = 10
     val updateInterval = 10
     val autoCorrelation:Observable[Double] = accelerometer
       .observeOn(ExecutionContextScheduler(global))
@@ -153,7 +153,7 @@ class MonitoringActivity extends Activity
     graphObservable
       .slider(20)
       //.observeOn(UIThreadScheduler(this))
-      .subscribeManaged { b =>
+      .subscribeRunning { b =>
         series1.setModel(b.map(_.asInstanceOf[java.lang.Double]).asJava, SimpleXYSeries.ArrayFormat.Y_VALS_ONLY)
         plot.redraw()
       }
@@ -167,13 +167,13 @@ class MonitoringActivity extends Activity
     }
     wifiScans
       .observeOn(UIThreadScheduler(this))
-      .subscribeManaged(adapter.onNext)
+      .subscribeRunning(adapter.onNext)
 
     findViewById(R.id.signals).asInstanceOf[ListView].setAdapter(adapter)
 
     Observable.just(-1) //to prevent initial delay
       .merge(Observable.interval(1 second))
-      .subscribeManaged(_ => startWifiscan())
+      .subscribeRunning(_ => startWifiscan())
 
     val btnLearnWalking = findViewById(R.id.btn_learn_walking).asInstanceOf[Button]
 
