@@ -95,10 +95,17 @@ class MonitoringActivity extends Activity
 //        findViewById(R.id.activity_guess).asInstanceOf[TextView].setText(guess)
 //      }
 
+    def stdev(xs: Seq[Acceleration]): Acceleration = {
+      val mean = xs.reduce(_ + _) / xs.length
+      val variance = xs.reduce((s, a) => s + (a - mean) * (a - mean))
+      Acceleration(Math.sqrt(variance.x).toFloat, Math.sqrt(variance.y).toFloat, Math.sqrt(variance.z).toFloat)
+    }
+
     accelerometer
       .map(event => Acceleration(event.values(0), event.values(1), event.values(2)))
       .slidingBuffer(100 millis, 100 millis)
-      .flatMap{sample => if(sample.isEmpty) Observable.empty else Observable.just(sample.sortBy(x => x.magnitude).apply(sample.size / 2))} //get median
+//      .flatMap{sample => if(sample.isEmpty) Observable.empty else Observable.just(sample.sortBy(x => x.magnitude).apply(sample.size / 2))} //get median
+      .flatMap{sample => if(sample.isEmpty) Observable.empty else Observable.just(stdev(sample))} //get stdev
       .map(a => classifier.classify(a))
       //.doOnEach(println(_))
       .slidingBuffer(6, 1)
@@ -165,7 +172,8 @@ class MonitoringActivity extends Activity
       .filter(_._1)
       .map{case (b, e) => Acceleration(e.values(0), e.values(1), e.values(2))}
       .slidingBuffer(500 millis, 500 millis)
-      .flatMap{sample => if(sample.isEmpty) Observable.empty else Observable.just(sample.sortBy(x => x.magnitude).apply(sample.size / 2))} //get median
+//      .flatMap{sample => if(sample.isEmpty) Observable.empty else Observable.just(sample.sortBy(x => x.magnitude).apply(sample.size / 2))} //get median
+      .flatMap{sample => if(sample.isEmpty) Observable.empty else Observable.just(stdev(sample))} //get stdev
       .foreach{ acc =>
         dbHelper.getWritableDatabase(){ db =>
             db.insertRow(walkTable,
@@ -201,7 +209,8 @@ class MonitoringActivity extends Activity
       .filter(_._1)
       .map{case (b, e) => Acceleration(e.values(0), e.values(1), e.values(2))}
       .slidingBuffer(500 millis, 500 millis)
-      .flatMap{sample => if(sample.isEmpty) Observable.empty else Observable.just(sample.sortBy(x => x.magnitude).apply(sample.size / 2))} //get median
+//      .flatMap{sample => if(sample.isEmpty) Observable.empty else Observable.just(sample.sortBy(x => x.magnitude).apply(sample.size / 2))} //get median
+      .flatMap{sample => if(sample.isEmpty) Observable.empty else Observable.just(stdev(sample))} //get stdev
       .foreach{ acc =>
       dbHelper.getWritableDatabase(){ db =>
           db.insertRow(queueTable,
