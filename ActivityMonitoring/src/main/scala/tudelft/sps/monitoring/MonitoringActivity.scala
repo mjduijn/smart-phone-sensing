@@ -21,6 +21,7 @@ import scala.concurrent.duration._
 import tudelft.sps.statistics.{SeqExtensions, Classifier, Knn}
 import tudelft.sps.lib.db._
 import scala.concurrent.ExecutionContext.Implicits._
+import tudelft.sps.observable._
 
 class MonitoringActivity extends Activity
   with ObservableAccelerometer
@@ -114,13 +115,15 @@ class MonitoringActivity extends Activity
 
     //TODO ask if discrete time is correct
     val tMin = 0
-    val tMax = 20
+    val tMax = 100
     val updateInterval = 10
     val autoCorrelation:Observable[Double] = accelerometer
       .observeOn(ExecutionContextScheduler(global))
       .map(Acceleration.apply)
       .slidingBuffer(tMax * 2, updateInterval)
+      .sample(25 millis)
       .map{ sample =>
+        val time = System.currentTimeMillis()
         def psi(m:Int) = {
           val magnitude = sample.map(_.magnitude)
           for (t_i <- tMin to (tMax - 1)) yield {
@@ -131,7 +134,7 @@ class MonitoringActivity extends Activity
             seq.sum / (t_i * magnitude.drop(m).take(t_i).variance * magnitude.drop(m + t_i).take(t_i).variance)
           }
         }
-        Log.d(TAG, "autoCorrelation result: " + psi(0).max)
+        Log.d(TAG, "[%dms]autoCorrelation result: %.2f".format(System.currentTimeMillis() - time, psi(0).max))
         psi(0).max
       }
 
@@ -148,7 +151,7 @@ class MonitoringActivity extends Activity
     graphObservable = autoCorrelation
 
     graphObservable
-      .slidingBuffer(20, 1)
+      .slider(20)
       //.observeOn(UIThreadScheduler(this))
       .subscribeManaged { b =>
         series1.setModel(b.map(_.asInstanceOf[java.lang.Double]).asJava, SimpleXYSeries.ArrayFormat.Y_VALS_ONLY)
