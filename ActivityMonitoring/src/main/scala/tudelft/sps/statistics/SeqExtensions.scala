@@ -25,6 +25,7 @@ object SeqExtensions{
       }
       sum / (n - m)
     }
+    def mean(seq:Seq[Double]): Double = mean(seq, 0, seq.size)
 
     def variance(seq:Seq[Double], m:Int, n:Int):Double = {
       if(seq.isEmpty){
@@ -40,6 +41,9 @@ object SeqExtensions{
         sum / (n - m)
       }
     }
-    def stdev(seq:Seq[Double], m:Int, n:Int):Double = Math.sqrt(variance(seq, m, n))
+    def variance(seq:Seq[Double]): Double = variance(seq, 0, seq.size)
+
+    def stdev(seq:Seq[Double], m:Int, n:Int): Double = Math.sqrt(variance(seq, m, n))
+    def stdev(seq:Seq[Double]): Double = stdev(seq, 0, seq.size)
   }
 }

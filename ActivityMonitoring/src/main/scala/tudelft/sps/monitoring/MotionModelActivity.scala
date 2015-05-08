@@ -83,7 +83,6 @@ class MotionModelActivity extends Activity
         plot.redraw()
       }
 
-    /*
     autoCorrelation
       .observeOn(UIThreadScheduler(this))
       .subscribeRunning{
@@ -94,24 +93,22 @@ class MotionModelActivity extends Activity
     accelerometer
       .map(_.magnitude)
       .slider(100)
-      .map(_.stdev)
+      .map(SeqMath.stdev(_))
       .observeOn(UIThreadScheduler(this))
       .subscribeRunning{ stdev =>
         textStdevAcc.setText("%.3f".format(stdev))
       }
-    */
-    /*
+
     val textSamplingRate = findViewById(R.id.textSamplingRate).asInstanceOf[TextView]
     accelerometer
       .map(_ => System.currentTimeMillis())
       .zipWithPrevious
-      .map(t => t._2 - t._1)
+      .map(t => (t._2 - t._1))
       .slidingBuffer(25, 25)
       .observeOn(UIThreadScheduler(this))
       .subscribeRunning{ diff =>
         val hertz = 1000 / diff.mean
         textSamplingRate.setText("%.1fHz".format(hertz))
       }
-      */
   }
 }
