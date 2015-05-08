@@ -31,15 +31,15 @@ class MotionModelActivity extends Activity
   val tMax = 75
 
   val autoCorrelation = accelerometer
-    .onBackpressureDrop
     .observeOn(ExecutionContextScheduler(global))
+    .onBackpressureDrop
     .map(_.magnitude)
     .slidingBuffer(tMax * 2, 25)
     .map{ sample =>
       val t0 = System.currentTimeMillis()
 
       var t_i = tMin
-      var max: (Int, Double) = (0, 0)
+      var max: (Int, Double, Double) = (0, 0, 0)
       while (t_i < (tMax - 1)) {
         val m = tMax * 2 - 2 * t_i
         val mean0 = SeqMath.mean(sample, m, m + t_i)
@@ -47,12 +47,13 @@ class MotionModelActivity extends Activity
         var k = 0
         var sum:Double = 0
         while(k < t_i - 1){
-          sum = sum + (sample(m + k) - mean0) * (sample(m + k + t_i) - mean1)
+          sum = sum + (sample(m + k) - mean0) * (sample(m + k + t_i) - mean1) //Do absolute value?
           k = k + 1
         }
-        val chi = sum / (t_i * SeqMath.stdev(sample, m, m + t_i) * SeqMath.stdev(sample, m + t_i, m + t_i * 2))
+        val sig1 = SeqMath.stdev(sample, m + t_i, m + t_i * 2)
+        val chi = sum / (t_i * SeqMath.stdev(sample, m, m + t_i) * sig1)
         if(chi > max._2){
-          max = (t_i, chi)
+          max = (t_i, chi, sig1)
         }
         t_i = t_i + 1
       }
@@ -73,7 +74,6 @@ class MotionModelActivity extends Activity
 
   override def onResume(): Unit = {
     super.onResume()
-    val textStepInterval = findViewById(R.id.textStepInterval).asInstanceOf[TextView]
 
     autoCorrelation
       .slider(20)
@@ -83,6 +83,7 @@ class MotionModelActivity extends Activity
         plot.redraw()
       }
 
+    val textStepInterval = findViewById(R.id.textStepInterval).asInstanceOf[TextView]
     autoCorrelation
       .observeOn(UIThreadScheduler(this))
       .subscribeRunning{
@@ -90,17 +91,15 @@ class MotionModelActivity extends Activity
       }
 
     val textStdevAcc = findViewById(R.id.textStdevAcc).asInstanceOf[TextView]
-    accelerometer
-      .map(_.magnitude)
-      .slider(100)
-      .map(SeqMath.stdev(_))
+    autoCorrelation
       .observeOn(UIThreadScheduler(this))
-      .subscribeRunning{ stdev =>
-        textStdevAcc.setText("%.3f".format(stdev))
+      .subscribeRunning{ x =>
+        textStdevAcc.setText("%.3f".format(x._3))
       }
 
     val textSamplingRate = findViewById(R.id.textSamplingRate).asInstanceOf[TextView]
     accelerometer
+      .observeOn(ExecutionContextScheduler(global))
       .map(_ => System.currentTimeMillis())
       .zipWithPrevious
       .map(t => (t._2 - t._1))

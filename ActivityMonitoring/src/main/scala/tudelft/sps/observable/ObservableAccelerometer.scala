@@ -13,17 +13,17 @@ trait ObservableAccelerometer extends Activity with SensorEventListener{
   val accelerometer:Observable[SensorEvent] = sensorChangedSubject
 
   private var sensorManager:SensorManager = null
-  private var accelleroMeter:Sensor = null
+  private var accelerometerSensor:Sensor = null
 
   abstract override def onCreate(savedInstanceState: Bundle): Unit = {
     super.onCreate(savedInstanceState)
     this.sensorManager = getSystemService(Context.SENSOR_SERVICE).asInstanceOf[SensorManager]
-    this.accelleroMeter = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
+    this.accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
   }
 
   abstract override def onResume(): Unit = {
     super.onResume()
-    sensorManager.registerListener(this, accelleroMeter, SensorManager.SENSOR_DELAY_GAME)
+    sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_GAME)
   }
 
   abstract override def onPause(): Unit = {
