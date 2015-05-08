@@ -7,14 +7,13 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.View.OnClickListener
-import android.widget.{Button, TextView, ListView}
+import android.widget._
 import com.androidplot.xy.{LineAndPointFormatter, SimpleXYSeries, XYSeries, XYPlot}
 import rx.lang.scala.schedulers.ExecutionContextScheduler
 import rx.lang.scala.{Subscriber, Observer, Observable}
 import tudelft.sps.data.Acceleration
 import tudelft.sps.observable._
 import scala.collection.JavaConverters._
-import android.widget.{ListView, TextView}
 import rx.lang.scala.Observable
 import tudelft.sps.wifi.{WifiSignal, ObservableWifiManager}
 import scala.concurrent.duration._
@@ -37,7 +36,13 @@ class MonitoringActivity extends Activity
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_hello)
+//    setContentView(R.layout.activity_hello)
+    setContentView(R.layout.activity_main)
+    val tabNames = List("Testing", "Evaluation")
+    val mDrawerLayout = findViewById(R.id.drawer_layout).asInstanceOf[DrawerLayout] //TODO find
+    val mDrawerList = findViewById(R.id.left_drawer).asInstanceOf[ListView]
+    mDrawerList.setAdapter(new ArrayAdapter[String](this, R.layout.drawer_list_item, tabNames.toArray))
+
 
     dbHelper = ObservableDBHelper.apply(this, "monitoring.db", 1,
       Seq(
