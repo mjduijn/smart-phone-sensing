@@ -21,7 +21,7 @@ object SeqExtensions{
       var sum:Double = 0
       while(i < n){
         sum = sum + seq(i)
-        i = i + i
+        i = i + 1
       }
       sum / (n - m)
     }

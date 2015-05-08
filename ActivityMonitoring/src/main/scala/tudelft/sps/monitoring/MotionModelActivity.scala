@@ -34,20 +34,22 @@ class MotionModelActivity extends Activity
     .observeOn(ExecutionContextScheduler(global))
     .onBackpressureDrop
     .map(_.magnitude)
-    .slidingBuffer(tMax * 2, 25)
+//    .slidingBuffer(tMax * 2, 25)
+    .slidingBuffer(tMax * 2, 5)
     .map{ sample =>
       val t0 = System.currentTimeMillis()
 
       var t_i = tMin
       var max: (Int, Double, Double) = (0, 0, 0)
-      while (t_i < (tMax - 1)) {
+      while (t_i <= tMax) {
         val m = tMax * 2 - 2 * t_i
         val mean0 = SeqMath.mean(sample, m, m + t_i)
         val mean1 = SeqMath.mean(sample, m + t_i, m + t_i * 2)
+
         var k = 0
         var sum:Double = 0
-        while(k < t_i - 1){
-          sum = sum + (sample(m + k) - mean0) * (sample(m + k + t_i) - mean1) //Do absolute value?
+        while(k < t_i){
+          sum = sum + (sample(m + k) - mean0) * (sample(m + k + t_i) - mean1)
           k = k + 1
         }
         val sig1 = SeqMath.stdev(sample, m + t_i, m + t_i * 2)
