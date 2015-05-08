@@ -4,7 +4,7 @@ import rx.lang.scala.Observable
 import scala.concurrent.duration._
 
 package object observable{
-  implicit class ObservableExtensions[A](val observable:Observable[A]) {
+  implicit class ObservableExtensions[A](val observable:Observable[A]) extends AnyVal{
     /**
      * similar to [[Observable.slidingBuffer( n, 1 ) )]], but starts emitting already before the buffer is full
      * @param n
@@ -28,5 +28,6 @@ package object observable{
     def zipWithPrevious: Observable[(A, A)] = observable
       .slidingBuffer(2, 1)
       .map(seq => (seq(0), seq(1)))
+
   }
 }

@@ -10,4 +10,5 @@
     <string name="walking">Walking</string>
     <string name="queueing">Queueing</string>
     <string name="samplingRate">Sampling rate</string>
+    <string name="stdevAcc">Stdev Acc</string>
 </resources>
