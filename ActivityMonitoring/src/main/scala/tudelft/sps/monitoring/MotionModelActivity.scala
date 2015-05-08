@@ -31,37 +31,34 @@ class MotionModelActivity extends Activity
   val tMax = 75
 
   val autoCorrelation = accelerometer
+    .onBackpressureDrop
     .observeOn(ExecutionContextScheduler(global))
     .map(_.magnitude)
     .slidingBuffer(tMax * 2, 25)
-    .throttleLast(500 millis)
     .map{ sample =>
-      def psi(m_old:Int) = {
-        val t0 = System.currentTimeMillis()
+      val t0 = System.currentTimeMillis()
 
-        var t_i = tMin
-        var max: (Int, Double) = (0, 0)
-        while (t_i < (tMax - 1)) {
-          val m = tMax * 2 - 2 * t_i
-          val mean0 = sample.drop(m).take(t_i).mean
-          val mean1 = sample.drop(m + t_i).take(t_i).mean
-          var k = 0
-          var sum:Double = 0
-          while(k < t_i - 1){
-            sum = sum + (sample(m + k) - mean0) * (sample(m + k + t_i) - mean1)
-            k = k + 1
-          }
-          val chi = sum / (t_i * sample.drop(m).take(t_i).stdev * sample.drop(m + t_i).take(t_i).stdev)
-          if(chi > max._2){
-            max = (t_i, chi)
-          }
-          t_i = t_i + 1
+      var t_i = tMin
+      var max: (Int, Double) = (0, 0)
+      while (t_i < (tMax - 1)) {
+        val m = tMax * 2 - 2 * t_i
+        val mean0 = SeqMath.mean(sample, m, m + t_i)
+        val mean1 = SeqMath.mean(sample, m + t_i, m + t_i * 2)
+        var k = 0
+        var sum:Double = 0
+        while(k < t_i - 1){
+          sum = sum + (sample(m + k) - mean0) * (sample(m + k + t_i) - mean1)
+          k = k + 1
         }
-        val dt = System.currentTimeMillis() - t0
-        Log.d(TAG, "[%s][%dms]autoCorrelation result: (%d, %.2f)".format(Thread.currentThread().getName, dt, max._1, max._2))
-        max
+        val chi = sum / (t_i * SeqMath.stdev(sample, m, m + t_i) * SeqMath.stdev(sample, m + t_i, m + t_i * 2))
+        if(chi > max._2){
+          max = (t_i, chi)
+        }
+        t_i = t_i + 1
       }
-      psi(0)
+      val dt = System.currentTimeMillis() - t0
+      Log.d(TAG, "[%s][%dms]autoCorrelation result: (%d, %.2f)".format(Thread.currentThread().getName, dt, max._1, max._2))
+      max
     }
 
   override def onCreate(savedInstanceState: Bundle): Unit = {
@@ -86,6 +83,7 @@ class MotionModelActivity extends Activity
         plot.redraw()
       }
 
+    /*
     autoCorrelation
       .observeOn(UIThreadScheduler(this))
       .subscribeRunning{
@@ -101,7 +99,8 @@ class MotionModelActivity extends Activity
       .subscribeRunning{ stdev =>
         textStdevAcc.setText("%.3f".format(stdev))
       }
-
+    */
+    /*
     val textSamplingRate = findViewById(R.id.textSamplingRate).asInstanceOf[TextView]
     accelerometer
       .map(_ => System.currentTimeMillis())
@@ -113,5 +112,6 @@ class MotionModelActivity extends Activity
         val hertz = 1000 / diff.mean
         textSamplingRate.setText("%.1fHz".format(hertz))
       }
+      */
   }
 }

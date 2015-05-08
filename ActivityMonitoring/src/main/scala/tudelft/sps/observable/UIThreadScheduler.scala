@@ -19,17 +19,21 @@ object UIThreadScheduler {
       override def isUnsubscribed = subscription.isUnsubscribed
 
       override def schedule(action: Action0): rx.Subscription = {
-        activity.runOnUiThread{
-          if(!isUnsubscribed) action.call()
-        }
+        activity.runOnUiThread(new Runnable(){
+          override def run(): Unit = {
+            if(!isUnsubscribed) action.call()
+          }
+        })
         this
       }
 
       override def schedule(action: Action0, delayTime: Long, unit: TimeUnit): rx.Subscription = {
-        activity.runOnUiThread{
-          Thread.sleep(Duration(delayTime, unit).toMillis)
-          if(!isUnsubscribed) action.call()
-        }
+        activity.runOnUiThread(new Runnable{
+          override def run(): Unit = {
+            Thread.sleep(Duration(delayTime, unit).toMillis)
+            if (!isUnsubscribed) action.call()
+          }
+        })
         this
       }
     }
