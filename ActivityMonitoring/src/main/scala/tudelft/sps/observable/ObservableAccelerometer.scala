@@ -7,7 +7,7 @@ import android.os.Bundle
 import rx.lang.scala.Observable
 import rx.lang.scala.subjects.PublishSubject
 
-trait ObservableAccelerometer extends Activity with SensorEventListener{
+trait ObservableAccelerometer extends Activity with SensorEventListener {
 
   private val sensorChangedSubject = PublishSubject[SensorEvent]()
   val accelerometer:Observable[SensorEvent] = sensorChangedSubject

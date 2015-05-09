@@ -2,10 +2,14 @@ package tudelft.sps.monitoring
 
 import android.app.Activity
 import android.content.ContentValues
+import android.content.res.Configuration
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
+import android.app.Fragment
+import android.support.v4.app.ActionBarDrawerToggle
+import android.support.v4.view.GravityCompat
 import android.util.Log
-import android.view.View
+import android.view.{Menu, ViewGroup, LayoutInflater, View}
 import android.view.View.OnClickListener
 import android.widget._
 import com.androidplot.xy.{LineAndPointFormatter, SimpleXYSeries, XYSeries, XYPlot}
@@ -20,6 +24,7 @@ import scala.concurrent.duration._
 import tudelft.sps.statistics.{Classifier, Knn}
 import tudelft.sps.lib.db._
 import scala.concurrent.ExecutionContext.Implicits._
+import android.support.v4.widget.DrawerLayout
 
 class MonitoringActivity extends Activity
   with ObservableAccelerometer
@@ -27,6 +32,12 @@ class MonitoringActivity extends Activity
   with ManagedSubscriptions
 {
   private val TAG = getClass.getSimpleName()
+
+  private var mDrawerLayout: DrawerLayout = null
+  private val tabNames = List("Testing", "Evaluation")
+  private var mDrawerList: ListView = null
+  private var mDrawerToggle: ActionBarDrawerToggle = null
+  private var mTitle: CharSequence = ""
 
 
   var classifier: Classifier[Acceleration, Int] = null
@@ -38,11 +49,37 @@ class MonitoringActivity extends Activity
     super.onCreate(savedInstanceState)
 //    setContentView(R.layout.activity_hello)
     setContentView(R.layout.activity_main)
-    val tabNames = List("Testing", "Evaluation")
-    val mDrawerLayout = findViewById(R.id.drawer_layout).asInstanceOf[DrawerLayout] //TODO find
-    val mDrawerList = findViewById(R.id.left_drawer).asInstanceOf[ListView]
-    mDrawerList.setAdapter(new ArrayAdapter[String](this, R.layout.drawer_list_item, tabNames.toArray))
 
+    mDrawerLayout = findViewById(R.id.drawer_layout).asInstanceOf[DrawerLayout]
+    mDrawerList = findViewById(R.id.left_drawer).asInstanceOf[ListView]
+    mDrawerList.setAdapter(new ArrayAdapter[String](this, R.layout.drawer_list_item, tabNames.toArray))
+    mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+      def onItemClick(parent: AdapterView[_], view: View, position: Int, id: Long) = {
+        selectItem(position)
+      }
+    })
+
+    mDrawerToggle = new ActionBarDrawerToggle(
+        this,                  /* host Activity */
+        mDrawerLayout,         /* DrawerLayout object */
+        R.drawable.ic_drawer,  /* nav drawer image to replace 'Up' caret */
+        R.string.drawer_open,  /* "open drawer" description for accessibility */
+        R.string.drawer_close  /* "close drawer" description for accessibility */
+    ) {
+      override def onDrawerClosed(view: View) = {
+        getActionBar().setTitle(mTitle);
+        invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+      }
+      override def onDrawerOpened(drawerView: View) = {
+        getActionBar().setTitle(mTitle);
+        invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+      }
+    }
+    mDrawerLayout.setDrawerListener(mDrawerToggle);
+
+    if (savedInstanceState == null) {
+      selectItem(0);
+    }
 
     dbHelper = ObservableDBHelper.apply(this, "monitoring.db", 1,
       Seq(
@@ -75,77 +112,56 @@ class MonitoringActivity extends Activity
     classifier = Knn.traversableToKnn(data).toKnn(5, (a, b) => a.distance(b))
   }
 
+  override def onCreateOptionsMenu(menu: Menu) = {
+    val inflater = getMenuInflater()
+    inflater.inflate(R.menu.main, menu)
+    super.onCreateOptionsMenu(menu)
+  }
+
+//  override def onPrepareOptionsMenu(menu: Menu): Boolean = {
+//    val drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList)
+//    menu.findItem(R.id.action_websearch).setVisible(!drawerOpen)
+//    super.onPrepareOptionsMenu(menu)
+//  }
+
+  /**
+   * When using the ActionBarDrawerToggle, you must call it during
+   * onPostCreate() and onConfigurationChanged()...
+   */
+  override def onPostCreate(savedInstanceState: Bundle) = {
+    super.onPostCreate(savedInstanceState)
+    mDrawerToggle.syncState()
+  }
+  override def onConfigurationChanged(newConfig: Configuration) = {
+    super.onConfigurationChanged(newConfig);
+    // Pass any configuration change to the drawer toggls
+    mDrawerToggle.onConfigurationChanged(newConfig);
+  }
+
+  def selectItem(position: Int): Unit = {
+    // update the main content by replacing fragments
+    val fragment: Fragment = new TrainFragment();
+//    val args = new Bundle();
+//
+//    args.putInt(PlanetFragment.ARG_PLANET_NUMBER, position);
+//    fragment.setArguments(args);
+
+    val fragmentManager = getFragmentManager();
+    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+
+    // update selected item and title, then close the drawer
+    mDrawerList.setItemChecked(position, true);
+    setTitle(tabNames(position));
+    mDrawerLayout.closeDrawer(mDrawerList);
+  }
+
+  override def setTitle(title: CharSequence): Unit = {
+    mTitle = title
+    getActionBar().setTitle(mTitle)
+  }
+
   override def onResume(): Unit = {
     super.onResume()
-    val accelerometerSum = accelerometer
-      .slidingBuffer(500 millis, 0 millis)
-      .map{buffer =>
-      (
-        buffer.map(event => Math.abs(event.values(0))).sum +
-          buffer.map(event => Math.abs(event.values(1))).sum +
-          buffer.map(event => Math.abs(event.values(2))).sum
-        ) / buffer.length
-    }
-
-    accelerometerSum
-      .observeOn(UIThreadScheduler(this))
-      .subscribeManaged{x =>
-        findViewById(R.id.accelerometer_value).asInstanceOf[TextView].setText("Accelerometer: %.2f".format(x))
-      }
-
-//    accelerometerSum
-//      .map(sum => if (sum > 3) "Walking" else "Queueing")
-//      .observeOn(UIThreadScheduler(this))
-//      .subscribeManaged{guess =>
-//        findViewById(R.id.activity_guess).asInstanceOf[TextView].setText(guess)
-//      }
-
-    accelerometer
-      .map(event => Acceleration(event.values(0), event.values(1), event.values(2)))
-      .slidingBuffer(100 millis, 100 millis)
-      .flatMap{sample => if(sample.isEmpty) Observable.empty else Observable.just(sample.sortBy(x => x.magnitude).apply(sample.size / 2))} //get median
-      .map(a => classifier.classify(a))
-      //.doOnEach(println(_))
-      .slidingBuffer(6, 1)
-      .map(list => if(list.count(_.equals(1)) >= 2) 1 else 0)
-      .map(v => if (v == 0) "Queueing" else "Walking" )
-      .observeOn(UIThreadScheduler(this))
-      .subscribeManaged{guess =>
-        findViewById(R.id.activity_guess).asInstanceOf[TextView].setText(guess)
-      }
-
-
-
-    val plot = findViewById(R.id.mySimpleXYPlot).asInstanceOf[XYPlot]
-    val series1 = new SimpleXYSeries("Series 1")
-    plot.addSeries(series1, new LineAndPointFormatter())
-
-    accelerometerSum
-      .filter(f => !f.isNaN)
-      .map(f => f: java.lang.Float)
-      .slidingBuffer(20, 1)
-      .observeOn(UIThreadScheduler(this))
-      .subscribeManaged { b =>
-        series1.setModel(b.asJava, SimpleXYSeries.ArrayFormat.Y_VALS_ONLY)
-        plot.redraw()
-      }
-
-    val adapter = ObservingListAdapter[WifiSignal, (TextView, TextView)](getApplicationContext, R.layout.signal_item){
-      //for efficiency: findViewById is very expensive if it has to be done for each element, so these references are cached with this method
-      view => (view.findViewById(R.id.mac).asInstanceOf[TextView], view.findViewById(R.id.rssi).asInstanceOf[TextView])
-    }{ (holder, element) => //updates the view for the current element, using the viewholder
-      holder._1.setText(element.mac)
-      holder._2.setText(element.rssi.toString)
-    }
-    wifiScans
-      .observeOn(UIThreadScheduler(this))
-      .subscribeManaged(adapter.onNext)
-
-    findViewById(R.id.signals).asInstanceOf[ListView].setAdapter(adapter)
-
-    Observable.just(-1) //to prevent initial delay
-      .merge(Observable.interval(1 second))
-      .subscribeManaged(_ => startWifiscan())
 
     val btnLearnWalking = findViewById(R.id.btn_learn_walking).asInstanceOf[Button]
 
@@ -217,5 +233,16 @@ class MonitoringActivity extends Activity
         }
       }
 
+  }
+
+  class TrainFragment extends Fragment {
+    def TrainFragment() {
+      // Empty constructor required for fragment subclasses
+    }
+
+    override def onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle) = {
+      val rootView: View = inflater.inflate(R.layout.fragment_planet, container, false)
+      rootView
+    }
   }
 }
