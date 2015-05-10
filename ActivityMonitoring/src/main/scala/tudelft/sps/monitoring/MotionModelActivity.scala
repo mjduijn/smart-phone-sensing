@@ -3,11 +3,13 @@ package tudelft.sps.monitoring
 import android.app.Activity
 import android.os.{PersistableBundle, Bundle}
 import android.util.Log
-import android.widget.TextView
+import android.view.View
+import android.view.View.OnClickListener
+import android.widget.{Button, TextView}
 import com.androidplot.xy.{BoundaryMode, LineAndPointFormatter, XYPlot, SimpleXYSeries}
 import scala.collection.JavaConverters._
 import scala.concurrent.duration._
-import rx.lang.scala.Observable
+import rx.lang.scala.{Subscriber, Observable}
 import rx.lang.scala.schedulers.ExecutionContextScheduler
 import tudelft.sps.observable.{ManagedSubscriptions, ObservableAccelerometer}
 import tudelft.sps.statistics.SeqExtensions._
@@ -60,7 +62,7 @@ class MotionModelActivity extends Activity
         t_i = t_i + 1
       }
       val dt = System.currentTimeMillis() - t0
-      Log.d(TAG, "[%s][%dms]autoCorrelation result: (%d, %.2f)".format(Thread.currentThread().getName, dt, max._1, max._2))
+//      Log.d(TAG, "[%s][%dms]autoCorrelation result: (%d, %.2f)".format(Thread.currentThread().getName, dt, max._1, max._2))
       max
     }
 
@@ -122,5 +124,40 @@ class MotionModelActivity extends Activity
       .subscribeRunning{ x =>
         textState.setText(x)
       }
+
+
+    /////Learned metrics part
+    val btnStartStop = findViewById(R.id.btn_start_stop).asInstanceOf[Button]
+    val btnWalking = findViewById(R.id.btn_walking).asInstanceOf[Button]
+    val btnQueueing = findViewById(R.id.btn_queueing).asInstanceOf[Button]
+    //Add onclick listeners
+    val startStopObs = Observable((aSubscriber: Subscriber[String]) => {
+      btnStartStop.setOnClickListener(new OnClickListener {
+        override def onClick(p1: View): Unit = if(!aSubscriber.isUnsubscribed) aSubscriber.onNext("Start")
+      })
+    }).scan((old: String, _: String) => if(old == "Start") "Stop" else "Start")
+    .doOnEach(state => if(state == "Stop") btnStartStop.setText("Start") else btnStartStop.setText("Stop"))
+
+    val walkingObs = Observable((aSubscriber: Subscriber[String]) => {
+      btnWalking.setOnClickListener(new OnClickListener {
+        override def onClick(p1: View): Unit = if(!aSubscriber.isUnsubscribed) aSubscriber.onNext("Walking")
+      })
+    })
+    val queueingObs = Observable((aSubscriber: Subscriber[String]) => {
+      btnQueueing.setOnClickListener(new OnClickListener {
+        override def onClick(p1: View): Unit = if(!aSubscriber.isUnsubscribed) aSubscriber.onNext("Queueing")
+      })
+    })
+
+    //TODO calculate times and stuff
+    var testingTimer = System.currentTimeMillis()
+    startStopObs
+      .merge(walkingObs)
+      .merge(queueingObs)
+      .subscribe(state => {
+
+
+    })
+
   }
 }

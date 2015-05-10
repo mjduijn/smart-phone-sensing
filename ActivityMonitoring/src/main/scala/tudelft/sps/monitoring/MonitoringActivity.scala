@@ -134,7 +134,7 @@ class MonitoringActivity extends Activity
             seq.sum / (t_i * magnitude.drop(m).take(t_i).variance * magnitude.drop(m + t_i).take(t_i).variance)
           }
         }
-        Log.d(TAG, "[%dms]autoCorrelation result: %.2f".format(System.currentTimeMillis() - time, psi(0).max))
+//        Log.d(TAG, "[%dms]autoCorrelation result: %.2f".format(System.currentTimeMillis() - time, psi(0).max))
         psi(0).max
       }
 
@@ -246,6 +246,5 @@ class MonitoringActivity extends Activity
           )
         }
       }
-
   }
 }
