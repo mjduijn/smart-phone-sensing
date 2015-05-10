@@ -52,10 +52,10 @@ class MotionModelActivity extends Activity
           sum = sum + (sample(m + k) - mean0) * (sample(m + k + t_i) - mean1)
           k = k + 1
         }
-        val sig1 = SeqMath.stdev(sample, m + t_i, m + t_i * 2)
-        val chi = sum / (t_i * SeqMath.stdev(sample, m, m + t_i) * sig1)
+        val stdev1 = SeqMath.stdev(sample, m + t_i, m + t_i * 2)
+        val chi = sum / (t_i * SeqMath.stdev(sample, m, m + t_i) * stdev1)
         if(chi > max._2){
-          max = (t_i, chi, sig1)
+          max = (t_i, chi, stdev1)
         }
         t_i = t_i + 1
       }
@@ -110,6 +110,17 @@ class MotionModelActivity extends Activity
       .subscribeRunning{ diff =>
         val hertz = 1000 / diff.mean
         textSamplingRate.setText("%.1fHz".format(hertz))
+      }
+    
+    val textState = findViewById(R.id.textState).asInstanceOf[TextView]
+    val chiThres = 0.7
+    val stdevThres = 0.5
+    autoCorrelation
+      .filter{case (tau, chi, stdev) => chi > chiThres || stdev < stdevThres}
+      .map{case (tau, chi, stdev) => if (stdev < stdevThres) "Queueing" else "Walking"}
+      .observeOn(UIThreadScheduler(this))
+      .subscribeRunning{ x =>
+        textState.setText(x)
       }
   }
 }
