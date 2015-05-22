@@ -160,8 +160,6 @@ class MotionModelActivity extends Activity
       .merge(walkingObs)
       .merge(queueingObs)
       .subscribe(state => {
-
-
     })
 
   }
