@@ -70,23 +70,6 @@ class MotionModelActivity extends Activity
     .slider(25)
     .map(SeqMath.stdev(_))
 
-  object MotionState extends Enumeration{
-    type MotionState = Value
-    val Walking, Queueing = Value
-
-  }
-
-  val motionState = autoCorrelation
-    .combineLatest(stdevMagnitude)
-    .scan(MotionState.Walking){case (oldState, ((tau, psi, _), stdev)) =>
-      if(psi > 0.7){
-        MotionState.Walking
-      } else if(stdev < 0.5){
-        MotionState.Queueing
-      } else{
-        oldState
-      }
-    }.distinctUntilChanged
 
   override def onCreate(savedInstanceState: Bundle): Unit = {
     super.onCreate(savedInstanceState)
@@ -123,13 +106,6 @@ class MotionModelActivity extends Activity
         textStdevAcc.setText("%.3f".format(x._3))
       }
 
-    val textState = findViewById(R.id.textState).asInstanceOf[TextView]
-    motionState
-      .observeOn(UIThreadScheduler(this))
-      .subscribeRunning{ state =>
-        textState.setText(state.toString)
-      }
-
     val textSamplingRate = findViewById(R.id.textSamplingRate).asInstanceOf[TextView]
     accelerometer
       .observeOn(ExecutionContextScheduler(global))
@@ -149,11 +125,11 @@ class MotionModelActivity extends Activity
     autoCorrelation
       .filter{case (tau, chi, stdev) => chi > chiThres || stdev < stdevThres}
       .map{case (tau, chi, stdev) => if (stdev < stdevThres) "Queueing" else "Walking"}
+      .distinctUntilChanged
       .observeOn(UIThreadScheduler(this))
       .subscribeRunning{ x =>
         textState.setText(x)
       }
-
 
     /////Learned metrics part
     val btnStartStop = findViewById(R.id.btn_start_stop).asInstanceOf[Button]
