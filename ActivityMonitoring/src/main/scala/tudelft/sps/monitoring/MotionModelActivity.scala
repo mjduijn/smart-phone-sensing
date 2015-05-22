@@ -1,11 +1,12 @@
 package tudelft.sps.monitoring
 
 import android.app.Activity
+import android.graphics.{Paint, Color, Canvas, Bitmap}
 import android.os.{PersistableBundle, Bundle}
 import android.util.Log
 import android.view.View
 import android.view.View.OnClickListener
-import android.widget.{Button, TextView}
+import android.widget.{ImageView, Button, TextView}
 import com.androidplot.xy.{BoundaryMode, LineAndPointFormatter, XYPlot, SimpleXYSeries}
 import scala.collection.JavaConverters._
 import scala.concurrent.duration._
@@ -161,6 +162,20 @@ class MotionModelActivity extends Activity
       .merge(queueingObs)
       .subscribe(state => {
     })
+
+    val b = Bitmap.createBitmap(730, 150, Bitmap.Config.ARGB_8888)
+    val canvas = new Canvas(b)
+    val iv = this.findViewById(R.id.image_floor_plan).asInstanceOf[ImageView]
+    iv.setImageBitmap(b)
+
+    iv.setBackgroundColor(Color.WHITE)
+    val lines = Line.create9th()
+    val paint = new Paint(Color.BLACK)
+
+    for (i <- lines.indices) {
+      canvas.drawLine((lines(i).x0 * 0.01).toFloat, (lines(i).y0 * 0.01).toFloat, (lines(i).x1 * 0.01).toFloat, (lines(i).y1 * 0.01).toFloat, paint)
+    }
+
 
   }
 }
