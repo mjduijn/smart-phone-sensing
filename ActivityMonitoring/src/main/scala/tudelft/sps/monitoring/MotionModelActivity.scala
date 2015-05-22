@@ -163,19 +163,31 @@ class MotionModelActivity extends Activity
       .subscribe(state => {
     })
 
-    val b = Bitmap.createBitmap(730, 150, Bitmap.Config.ARGB_8888)
+    val floormap = FloorMap(1000)
+
+
+    val b = Bitmap.createBitmap(720, 143, Bitmap.Config.ARGB_8888)
     val canvas = new Canvas(b)
     val iv = this.findViewById(R.id.image_floor_plan).asInstanceOf[ImageView]
     iv.setImageBitmap(b)
 
     iv.setBackgroundColor(Color.WHITE)
-    val lines = Line.create9th()
-    val paint = new Paint(Color.BLACK)
+    val lines = floormap.walls
+    val paint = new Paint()
+    paint.setColor(Color.BLACK)
 
     for (i <- lines.indices) {
       canvas.drawLine((lines(i).x0 * 0.01).toFloat, (lines(i).y0 * 0.01).toFloat, (lines(i).x1 * 0.01).toFloat, (lines(i).y1 * 0.01).toFloat, paint)
     }
 
+    paint.setColor(Color.BLUE)
+    for(p <- floormap.particles){
+      canvas.drawPoint(p.x / 100, p.y / 100, paint)
+    }
+    paint.setColor(Color.RED)
+    for(d <- floormap.deadZones){
+      canvas.drawCircle(d._1 / 100, d._2 /100, 10, paint)
+    }
 
   }
 }
