@@ -30,13 +30,12 @@ class MotionModelActivity extends Activity
 
 
   val tMin = 40
-  val tMax = 75
+  val tMax = 100
 
   val autoCorrelation = accelerometer
     .observeOn(ExecutionContextScheduler(global))
     .onBackpressureDrop
     .map(_.magnitude)
-//    .slidingBuffer(tMax * 2, 25)
     .slidingBuffer(tMax * 2, 5)
     .map{ sample =>
       val t0 = System.currentTimeMillis()
@@ -65,6 +64,29 @@ class MotionModelActivity extends Activity
 //      Log.d(TAG, "[%s][%dms]autoCorrelation result: (%d, %.2f)".format(Thread.currentThread().getName, dt, max._1, max._2))
       max
     }
+
+  val stdevMagnitude = accelerometer
+    .map(_.magnitude)
+    .slider(25)
+    .map(SeqMath.stdev(_))
+
+  object MotionState extends Enumeration{
+    type MotionState = Value
+    val Walking, Queueing = Value
+
+  }
+
+  val motionState = autoCorrelation
+    .combineLatest(stdevMagnitude)
+    .scan(MotionState.Walking){case (oldState, ((tau, psi, _), stdev)) =>
+      if(psi > 0.7){
+        MotionState.Walking
+      } else if(stdev < 0.5){
+        MotionState.Queueing
+      } else{
+        oldState
+      }
+    }.distinctUntilChanged
 
   override def onCreate(savedInstanceState: Bundle): Unit = {
     super.onCreate(savedInstanceState)
@@ -99,6 +121,13 @@ class MotionModelActivity extends Activity
       .observeOn(UIThreadScheduler(this))
       .subscribeRunning{ x =>
         textStdevAcc.setText("%.3f".format(x._3))
+      }
+
+    val textState = findViewById(R.id.textState).asInstanceOf[TextView]
+    motionState
+      .observeOn(UIThreadScheduler(this))
+      .subscribeRunning{ state =>
+        textState.setText(state.toString)
       }
 
     val textSamplingRate = findViewById(R.id.textSamplingRate).asInstanceOf[TextView]
