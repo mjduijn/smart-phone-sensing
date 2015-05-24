@@ -1,11 +1,12 @@
 package tudelft.sps.monitoring
 
 import android.app.Activity
-import android.graphics.{Paint, Color, Canvas, Bitmap}
+import android.graphics._
 import android.os.{PersistableBundle, Bundle}
 import android.util.Log
 import android.view.View
 import android.view.View.OnClickListener
+import android.widget.ImageView.ScaleType
 import android.widget.{ImageView, Button, TextView}
 import com.androidplot.xy.{BoundaryMode, LineAndPointFormatter, XYPlot, SimpleXYSeries}
 import scala.collection.JavaConverters._
@@ -163,23 +164,41 @@ class MotionModelActivity extends Activity
       .subscribe(state => {
     })
 
-    val floormap = FloorMap(10000)
+    val floormap = FloorMap(1000)
 
-    val b = Bitmap.createBitmap(720, 143, Bitmap.Config.ARGB_8888)
+
+
+    val b  = Bitmap.createBitmap(720, 143, Bitmap.Config.ARGB_8888)
+//    val b = Bitmap.createBitmap(b0, 0, 0, 143, 720, matrix, true)
     val canvas = new Canvas(b)
     val iv = this.findViewById(R.id.image_floor_plan).asInstanceOf[ImageView]
+
     iv.setImageBitmap(b)
+
+    val matrix = new Matrix()
+    iv.setScaleType(ScaleType.MATRIX)   //required
+    matrix.postScale(1.75.toFloat, 4)
+    matrix.postRotate(90, 720/2, 720/2)
+
+//    matrix.postRotate(90, 720/2, 720/2)
+//    matrix.postScale(4, 1)
+
+    iv.setImageMatrix(matrix)
 
     val lines = floormap.walls
     val paint = new Paint()
 
     Observable.interval(1000 millis, ExecutionContextScheduler(global))
       .doOnEach((_) => {
+
+//        canvas.save(Canvas.MATRIX_SAVE_FLAG)
+//        canvas.rotate(90, -143/2 , -720/2)
+
         canvas.drawColor(Color.WHITE)
 
         paint.setColor(Color.BLACK)
         for (i <- lines.indices) {
-          canvas.drawLine((lines(i).x0 * 0.01).toFloat, (lines(i).y0 * 0.01).toFloat, (lines(i).x1 * 0.01).toFloat, (lines(i).y1 * 0.01).toFloat, paint)
+          canvas.drawLine(lines(i).x0 / 100, lines(i).y0 / 100, lines(i).x1 / 100, lines(i).y1 / 100, paint)
         }
 
         paint.setColor(Color.BLUE)
@@ -196,6 +215,7 @@ class MotionModelActivity extends Activity
         for(p <- floormap.particles) {
           canvas.drawPoint(p.x / 100, p.y / 100, paint)
         }
+//        canvas.restore()
       })
       .observeOn(UIThreadScheduler(this))
       .foreach((_) => iv.invalidate())

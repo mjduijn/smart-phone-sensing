@@ -383,6 +383,6 @@
         <ImageView
             android:id="@+id/image_floor_plan"
             android:layout_width="match_parent"
-            android:layout_height="400dp" />
+            android:layout_height="5  00dp" />
     </LinearLayout>
 </ScrollView>
