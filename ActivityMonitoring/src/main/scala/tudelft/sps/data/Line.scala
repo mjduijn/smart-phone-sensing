@@ -52,9 +52,9 @@ case class Line(x0: Int,x1: Int, y0: Int, y1: Int) {
     isPointRightOfLine(x2, y2) ^ isPointRightOfLine(x3, y3)
 
   def doLinesIntersect(x2:Int, x3:Int, y2:Int, y3:Int): Boolean =
-    doBoundingBoxesIntersect(x2, x3, y2, y3) &&
-    lineSegmentTouchesOrCrossesLine(x2, x3, y2, y3) &&
-    lineSegmentTouchesOrCrossesLine(y2, y3, x2, x3)
+    doBoundingBoxesIntersect(x2, x3, y2, y3)// &&
+//    lineSegmentTouchesOrCrossesLine(x2, x3, y2, y3) &&
+//    lineSegmentTouchesOrCrossesLine(y2, y3, x2, x3)
 }
 
 object Line {

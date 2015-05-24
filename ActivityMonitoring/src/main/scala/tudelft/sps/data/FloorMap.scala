@@ -14,13 +14,16 @@ class FloorMap(
   private val random = new Random()
 
   private var current = particles1
+  private var old = particles2
   def particles = current
 
-  private def swap() = current = if(current.equals(particles1)) particles2 else particles1
+  private def swap() =  {
+    current = if(current.equals(particles1)) particles2 else particles1
+    old = if(old.equals(particles1)) particles2 else particles1
+  }
 
   for(i <- 0 until particleCount){
     var randomParticle = Particle(random.nextInt(width + 1), random.nextInt(height + 1), 0, 0)
-
 
     while(deadZones.exists{case (x,y) => !walls.exists(wall => wall.doLinesIntersect(x, randomParticle.x, y, randomParticle.y))}){
       randomParticle = Particle(random.nextInt(width + 1), random.nextInt(height + 1), 0, 0)
@@ -30,7 +33,23 @@ class FloorMap(
     particles2(i) = randomParticle.copy()
   }
 
+  /**
+   *
+   * @param strideLength length of stride in mm
+   */
+  def move(strideLength: Int, angle: Int) = {
+    val compassError = 0.0 // beta_i TODO should be a gaussian error
+    val placementOffset = 0.0 //alpha_i since phone is kept straight ahead, should always be 0
+    val angleRad = ((angle * Math.PI) / 180)
 
+    for(i <- current.indices) {
+      val strideLengthError = ((random.nextInt(strideLength * 2) - strideLength) * 0.1).toInt // delta_i up to 10% of stride length
+      val stride = strideLength + strideLengthError
+      old(i).x = current(i).x + stride * Math.cos(placementOffset + compassError + angleRad).toInt
+      old(i).y = current(i).y + stride * Math.sin(placementOffset + compassError + angleRad).toInt
+    }
+    swap()
+  }
 }
 
 object FloorMap{
@@ -48,8 +67,7 @@ object FloorMap{
     Line(toCo(x0), toCo(x1), toCo(y0), toCo(y1))
 
   def create9th(): Array[Line] = {
-    val result = scala.collection.mutable.MutableList[Line]()//new Array[Line](nrOfWalls)
-
+    val result = scala.collection.mutable.MutableList[Line]()
 
     //Room 1
     result += mkline(0.0, 0, 0, 6.1)
@@ -98,10 +116,10 @@ object FloorMap{
   }
 
   val deadZones = Array[(Int, Int)](
-//    (10000, 2000),
-//    (70000, 3000),
-//    (6000, 10000),
-//    (25000, 10000),
+    (10000, 2000),
+    (70000, 3000),
+    (6000, 10000),
+    (25000, 10000),
     (70000, 10000)
   )
 }
