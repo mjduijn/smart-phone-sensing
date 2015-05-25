@@ -188,8 +188,15 @@ class MotionModelActivity extends Activity
     val lines = floormap.walls
     val paint = new Paint()
 
-    Observable.interval(1000 millis, ExecutionContextScheduler(global))
-      .doOnEach((_) => {
+//    var angle:Float = 0.0f
+
+    compass
+      .observeOn(ExecutionContextScheduler(global))
+      .sample(1000 millis)
+
+//    Observable.interval(1000 millis, ExecutionContextScheduler(global))
+//      .combineLatestWith(compass)
+      .doOnEach((angle) => {
 
 //        canvas.save(Canvas.MATRIX_SAVE_FLAG)
 //        canvas.rotate(90, -143/2 , -720/2)
@@ -210,7 +217,7 @@ class MotionModelActivity extends Activity
           canvas.drawCircle(d._1 / 100, d._2 /100, 10, paint)
         }
 
-        floormap.move(1000, 0)
+        floormap.move(1000, angle)
         paint.setColor(Color.BLUE)
         for(p <- floormap.particles) {
           canvas.drawPoint(p.x / 100, p.y / 100, paint)
@@ -221,5 +228,6 @@ class MotionModelActivity extends Activity
       .foreach((_) => iv.invalidate())
 
     compass.foreach(x => println(x))
+
   }
 }

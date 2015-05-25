@@ -37,16 +37,17 @@ class FloorMap(
    *
    * @param strideLength length of stride in mm
    */
-  def move(strideLength: Int, angle: Int) = {
+  def move(strideLength: Int, angle: Float) = {
     val compassError = 0.0 // beta_i TODO should be a gaussian error
     val placementOffset = 0.0 //alpha_i since phone is kept straight ahead, should always be 0
-    val angleRad = ((angle * Math.PI) / 180)
+//    val angleRad = ((angle * Math.PI) / 180)
 
+    println(angle)
     for(i <- current.indices) {
       val strideLengthError = ((random.nextInt(strideLength * 2) - strideLength) * 0.1).toInt // delta_i up to 10% of stride length
       val stride = strideLength + strideLengthError
-      old(i).x = current(i).x + stride * Math.cos(placementOffset + compassError + angleRad).toInt
-      old(i).y = current(i).y + stride * Math.sin(placementOffset + compassError + angleRad).toInt
+      old(i).x = (current(i).x + stride * Math.cos(placementOffset + compassError + angle)).toInt
+      old(i).y = (current(i).y + stride * Math.sin(placementOffset + compassError + angle)).toInt
     }
     swap()
   }
