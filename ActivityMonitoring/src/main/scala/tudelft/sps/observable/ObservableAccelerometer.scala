@@ -7,13 +7,14 @@ import android.os.Bundle
 import rx.lang.scala.Observable
 import rx.lang.scala.subjects.PublishSubject
 
-trait ObservableAccelerometer extends Activity with SensorEventListener{
+trait ObservableAccelerometer extends Activity{
 
   private val sensorChangedSubject = PublishSubject[SensorEvent]()
   val accelerometer:Observable[SensorEvent] = sensorChangedSubject
 
   private var sensorManager:SensorManager = null
   private var accelerometerSensor:Sensor = null
+  private val accelerometerEventListener = new AccelerometerSensorEventListener()
 
   abstract override def onCreate(savedInstanceState: Bundle): Unit = {
     super.onCreate(savedInstanceState)
@@ -23,18 +24,20 @@ trait ObservableAccelerometer extends Activity with SensorEventListener{
 
   abstract override def onResume(): Unit = {
     super.onResume()
-    sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_GAME)
+    sensorManager.registerListener(accelerometerEventListener, accelerometerSensor, SensorManager.SENSOR_DELAY_GAME)
   }
 
   abstract override def onPause(): Unit = {
     super.onPause()
-    sensorManager.unregisterListener(this)
+    sensorManager.unregisterListener(accelerometerEventListener)
   }
 
-  override def onSensorChanged(event: SensorEvent): Unit = {
-    sensorChangedSubject.onNext(event)
-  }
+  private class AccelerometerSensorEventListener extends SensorEventListener{
+    override def onSensorChanged(event: SensorEvent): Unit = {
+      sensorChangedSubject.onNext(event)
+    }
 
-  override def onAccuracyChanged(sensor: Sensor, acc: Int): Unit = {
+    override def onAccuracyChanged(sensor: Sensor, acc: Int): Unit = {
+    }
   }
 }

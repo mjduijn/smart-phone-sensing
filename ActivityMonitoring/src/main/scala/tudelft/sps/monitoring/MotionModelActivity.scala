@@ -64,7 +64,6 @@ class MotionModelActivity extends Activity
         t_i = t_i + 1
       }
       val dt = System.currentTimeMillis() - t0
-//      Log.d(TAG, "[%s][%dms]autoCorrelation result: (%d, %.2f)".format(Thread.currentThread().getName, dt, max._1, max._2))
       max
     }
 
@@ -157,6 +156,10 @@ class MotionModelActivity extends Activity
       })
     })
 
+
+
+    /*
+
     //TODO calculate times and stuff
     var testingTimer = System.currentTimeMillis()
     startStopObs
@@ -221,6 +224,7 @@ class MotionModelActivity extends Activity
       .observeOn(UIThreadScheduler(this))
       .foreach((_) => iv.invalidate())
 
-    compass.foreach(x => println(x.values(0) + " " + x.values(1) + " " + x.values(2)))
+    compass.foreach(x => println(x))
+    */
   }
 }

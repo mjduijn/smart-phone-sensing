@@ -7,34 +7,56 @@ import android.os.Bundle
 import rx.lang.scala.Observable
 import rx.lang.scala.subjects.PublishSubject
 
-trait ObservableCompass extends Activity with SensorEventListener {
+trait ObservableCompass extends Activity{
 
-  private val sensorChangedSubject = PublishSubject[SensorEvent]()
-  val compass:Observable[SensorEvent] = sensorChangedSubject
+  private val sensorChangedSubject = PublishSubject[Float]()
+  val compass:Observable[Float] = sensorChangedSubject
 
   private var sensorManager:SensorManager = null
   private var compassSensor:Sensor = null
+  private var accelerometer:Sensor = null
+  private val compassEventListener = new CompassSensorEventListener()
 
   abstract override def onCreate(savedInstanceState: Bundle): Unit = {
     super.onCreate(savedInstanceState)
     this.sensorManager = getSystemService(Context.SENSOR_SERVICE).asInstanceOf[SensorManager]
     this.compassSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
+    this.accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
   }
 
   abstract override def onResume(): Unit = {
     super.onResume()
-    sensorManager.registerListener(this, compassSensor, SensorManager.SENSOR_DELAY_UI)
+    sensorManager.registerListener(compassEventListener, compassSensor, SensorManager.SENSOR_DELAY_UI)
+    sensorManager.registerListener(compassEventListener, accelerometer, SensorManager.SENSOR_DELAY_UI)
   }
 
   abstract override def onPause(): Unit = {
     super.onPause()
-    sensorManager.unregisterListener(this)
+    sensorManager.unregisterListener(compassEventListener)
   }
 
-  override def onSensorChanged(event: SensorEvent): Unit = {
-    sensorChangedSubject.onNext(event)
-  }
+  private class CompassSensorEventListener extends SensorEventListener{
+    private var gravity: Array[Float] = null
+    private var geomagnetic: Array[Float] = null
 
-  override def onAccuracyChanged(sensor: Sensor, acc: Int): Unit = {
+    override def onSensorChanged(event: SensorEvent): Unit = {
+      if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+        gravity = event.values
+      } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD){
+        geomagnetic = event.values
+      }
+      if (gravity != null && geomagnetic != null) {
+        val r = new Array[Float](9)
+        val i = new Array[Float](9)
+        val success = SensorManager.getRotationMatrix(r, i, gravity, geomagnetic)
+        if (success) {
+          val orientation = new Array[Float](3)
+          SensorManager.getOrientation(r, orientation)
+          sensorChangedSubject.onNext(orientation(0))
+        }
+      }
+    }
+
+    override def onAccuracyChanged(p1: Sensor, p2: Int): Unit = {}
   }
 }
