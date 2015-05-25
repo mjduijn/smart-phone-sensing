@@ -10,7 +10,7 @@ import rx.lang.scala.subjects.PublishSubject
 trait ObservableAccelerometer extends Activity{
 
   private val sensorChangedSubject = PublishSubject[SensorEvent]()
-  val accelerometer:Observable[SensorEvent] = sensorChangedSubject
+  val accelerometer:Observable[SensorEvent] = sensorChangedSubject.onBackpressureDrop
 
   private var sensorManager:SensorManager = null
   private var accelerometerSensor:Sensor = null
