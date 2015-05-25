@@ -23,6 +23,7 @@ import scala.concurrent.ExecutionContext.Implicits._
 class MotionModelActivity extends Activity
   with ObservableAccelerometer
   with ManagedSubscriptions
+  with ObservableCompass
 {
   val TAG = "MotionModelActivity"
 
@@ -219,5 +220,7 @@ class MotionModelActivity extends Activity
       })
       .observeOn(UIThreadScheduler(this))
       .foreach((_) => iv.invalidate())
+
+    compass.foreach(x => println(x.values(0) + " " + x.values(1) + " " + x.values(2)))
   }
 }

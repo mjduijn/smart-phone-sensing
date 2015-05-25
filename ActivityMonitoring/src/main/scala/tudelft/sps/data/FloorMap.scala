@@ -28,7 +28,7 @@ class FloorMap(
     while(deadZones.exists{case (x,y) => !walls.exists(wall => wall.doLinesIntersect(x, randomParticle.x, y, randomParticle.y))}){
       randomParticle = Particle(random.nextInt(width + 1), random.nextInt(height + 1), 0, 0)
     }
-    println("Generated particle")
+//    println("Generated particle")
     particles1(i) = randomParticle
     particles2(i) = randomParticle.copy()
   }
