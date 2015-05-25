@@ -288,6 +288,7 @@ class MotionModelActivity extends Activity
 //        canvas.rotate(90, -143/2 , -720/2)
 
         canvas.drawColor(Color.WHITE)
+      
 
         paint.setColor(Color.BLACK)
         for (i <- lines.indices) {
