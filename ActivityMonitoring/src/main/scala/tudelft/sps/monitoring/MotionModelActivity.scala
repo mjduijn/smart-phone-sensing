@@ -156,10 +156,6 @@ class MotionModelActivity extends Activity
       })
     })
 
-
-
-    /*
-
     //TODO calculate times and stuff
     var testingTimer = System.currentTimeMillis()
     startStopObs
@@ -225,6 +221,5 @@ class MotionModelActivity extends Activity
       .foreach((_) => iv.invalidate())
 
     compass.foreach(x => println(x))
-    */
   }
 }
