@@ -48,6 +48,16 @@ class FloorMap(
       val stride = strideLength + strideLengthError
       old(i).x = (current(i).x + stride * Math.cos(placementOffset + compassError + angle)).toInt
       old(i).y = (current(i).y + stride * Math.sin(placementOffset + compassError + angle)).toInt
+
+
+
+      for{
+        wall <- walls if wall.doLinesIntersect(old(i).x, current(i).x, old(i).y, current(i).y)
+      }{
+        val randomPoint = random.nextInt(particleCount)
+        old(i).x = current(randomPoint).x
+        old(i).y = current(randomPoint).y
+      }
     }
     swap()
   }

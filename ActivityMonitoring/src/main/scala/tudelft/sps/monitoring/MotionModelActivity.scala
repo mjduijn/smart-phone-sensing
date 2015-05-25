@@ -36,8 +36,8 @@ class MotionModelActivity extends Activity
   val tMax = 100
 
   val autoCorrelation = accelerometer
-    .observeOn(ExecutionContextScheduler(global))
     .onBackpressureDrop
+    .observeOn(ExecutionContextScheduler(global))
     .map(_.magnitude)
     .slidingBuffer(tMax * 2, 5)
     .map{ sample =>
@@ -164,7 +164,7 @@ class MotionModelActivity extends Activity
       .subscribe(state => {
     })
 
-    val floormap = FloorMap(1000)
+    val floormap = FloorMap(10000)
 
 
 
@@ -191,6 +191,7 @@ class MotionModelActivity extends Activity
 //    var angle:Float = 0.0f
 
     compass
+      .onBackpressureDrop
       .observeOn(ExecutionContextScheduler(global))
       .sample(1000 millis)
 
@@ -227,7 +228,7 @@ class MotionModelActivity extends Activity
       .observeOn(UIThreadScheduler(this))
       .foreach((_) => iv.invalidate())
 
-    compass.foreach(x => println(x))
+    //compass.foreach(x => println(x))
 
   }
 }
