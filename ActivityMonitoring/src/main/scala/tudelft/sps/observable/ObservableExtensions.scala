@@ -29,5 +29,8 @@ package object observable{
       .slidingBuffer(2, 1)
       .map(seq => (seq(0), seq(1)))
 
+
+    def toggle[A](first:A, second:A):Observable[A] = observable.scan(first){(prev, cur) => if(prev.equals(first)) second else first}
+    def toggle():Observable[Boolean] = observable.toggle(true, false)
   }
 }

@@ -3,6 +3,7 @@ package tudelft.sps.monitoring
 import android.app.Activity
 import android.graphics._
 import android.os.{PersistableBundle, Bundle}
+import android.preference.PreferenceManager
 import android.util.Log
 import android.view.{WindowManager, View}
 import android.view.View.OnClickListener
@@ -17,6 +18,8 @@ import tudelft.sps.observable.{ManagedSubscriptions, ObservableAccelerometer}
 import tudelft.sps.statistics.SeqExtensions._
 import tudelft.sps.observable._
 import tudelft.sps.data._
+import tudelft.sps.observable.ViewObservable._
+import tudelft.sps.lib.db._
 
 import scala.concurrent.ExecutionContext.Implicits._
 
@@ -31,18 +34,14 @@ class MotionModelActivity extends Activity
   var plot:XYPlot = null
   var series:SimpleXYSeries = null
 
-
   val tMin = 40
-  val tMax = 100
+  val tMax = 90
 
   val autoCorrelation = accelerometer
-    .onBackpressureDrop
     .observeOn(ExecutionContextScheduler(global))
     .map(_.magnitude)
     .slidingBuffer(tMax * 2, 5)
     .map{ sample =>
-      val t0 = System.currentTimeMillis()
-
       var t_i = tMin
       var max: (Int, Double, Double) = (0, 0, 0)
       while (t_i <= tMax) {
@@ -63,9 +62,10 @@ class MotionModelActivity extends Activity
         }
         t_i = t_i + 1
       }
-      val dt = System.currentTimeMillis() - t0
       max
     }
+
+
 
   val stdevMagnitude = accelerometer
     .map(_.magnitude)
@@ -73,10 +73,31 @@ class MotionModelActivity extends Activity
     .map(SeqMath.stdev(_))
 
 
+  val walkTable = "WalkingAcceleration"
+  val queueTable = "QueueAcceleration"
+  val dbCreateQuery = Seq(
+      s"""
+          |CREATE TABLE $walkTable(
+          | stdev REAL,
+          | alpha REAL
+        |);
+        """.stripMargin,
+      s"""
+          |CREATE TABLE $queueTable(
+          | stdev REAL,
+          | alpha REAL
+          |);
+        """.stripMargin
+  )
+
+  var database:ObservableDBHelper = null
+
+
   override def onCreate(savedInstanceState: Bundle): Unit = {
     super.onCreate(savedInstanceState)
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     setContentView(R.layout.activity_motion_model)
+    database = ObservableDBHelper(this, "MotionModel", 1, dbCreateQuery)
     plot = findViewById(R.id.plot).asInstanceOf[XYPlot]
     plot.setRangeBoundaries(0, 1, BoundaryMode.FIXED)
     series = new SimpleXYSeries("AutoCorrelation")
@@ -145,15 +166,32 @@ class MotionModelActivity extends Activity
       }
     
     val textState = findViewById(R.id.textState).asInstanceOf[TextView]
-    val chiThres = 0.7
-    val stdevThres = 0.5
-    autoCorrelation
-      .filter{case (tau, chi, stdev) => chi > chiThres || stdev < stdevThres}
-      .map{case (tau, chi, stdev) => if (stdev < stdevThres) "Queueing" else "Walking"}
-      .distinctUntilChanged
+//    val chiThres = 0.7
+//    val stdevThres = 0.3
+//    autoCorrelation
+//      .filter{case (tau, chi, stdev) => chi > chiThres || stdev < stdevThres}
+//      .map{case (tau, chi, stdev) => if (stdev < stdevThres) "Queueing" else "Walking"}
+//      .distinctUntilChanged
+//      .observeOn(UIThreadScheduler(this))
+//      .subscribeRunning{ x =>
+//        textState.setText(x)
+//      }
+
+    val stdevMin = 0.3
+    val stdevMax = 0.9
+
+    val stdevAcc = accelerometer
+      .map(_.magnitude)
+      .slidingBuffer(10, 1)
+      .map(SeqMath.stdev)
       .observeOn(UIThreadScheduler(this))
-      .subscribeRunning{ x =>
-        textState.setText(x)
+      .foreach { x =>
+        textStdevAcc.setText("%.3f".format(x))
+        if (x < stdevMin) {
+          textState.setText("Queueing")
+        } else if (x > stdevMax) {
+          textState.setText("Walking")
+        }
       }
 
     /////Learned metrics part
@@ -161,12 +199,36 @@ class MotionModelActivity extends Activity
     val btnWalking = findViewById(R.id.btn_walking).asInstanceOf[Button]
     val btnQueueing = findViewById(R.id.btn_queueing).asInstanceOf[Button]
     //Add onclick listeners
-    val startStopObs = Observable((aSubscriber: Subscriber[String]) => {
-      btnStartStop.setOnClickListener(new OnClickListener {
-        override def onClick(p1: View): Unit = if(!aSubscriber.isUnsubscribed) aSubscriber.onNext("Start")
-      })
-    }).scan((old: String, _: String) => if(old == "Start") "Stop" else "Start")
-    .doOnEach(state => if(state == "Stop") btnStartStop.setText("Start") else btnStartStop.setText("Stop"))
+    val startStopObs= btnStartStop.onClick
+    .toggle()
+    .doOnEach(if(_){
+      btnStartStop.setText("Start")
+    } else {
+      btnStartStop.setText("Stop")
+    })
+
+
+    val btnTrainWalking = findViewById(R.id.btn_learn_walking).asInstanceOf[Button]
+    btnTrainWalking.onClick
+    .toggle()
+    .doOnEach(if(_){database.getWritableDatabase().delete(queueTable, null, null)})
+    .combineLatestWith(accelerometer)((b, e) => (b, e))
+    .filter(_._1)
+    .map(_._2.magnitude)
+    .slidingBuffer(50, 10)
+    .foreach{ points =>
+      val stdev = points.stdev
+      val alpha = 0d
+      database.getWritableDatabase(){ db =>
+        db.insertRow(queueTable,
+          "stdev" -> stdev,
+          "alpha" -> alpha
+        )
+      }
+    }
+    val btnTrainQueueing = findViewById(R.id.btn_learn_queuing).asInstanceOf[Button]
+
+
 
     val walkingObs = Observable((aSubscriber: Subscriber[String]) => {
       btnWalking.setOnClickListener(new OnClickListener {
@@ -183,8 +245,8 @@ class MotionModelActivity extends Activity
     var testingTimer = System.currentTimeMillis()
     startStopObs
       .merge(walkingObs)
-      .merge(queueingObs)
-      .subscribe(state => {
+        .merge(queueingObs)
+        .subscribe(state => {
     })
 
     val floormap = FloorMap(10000)

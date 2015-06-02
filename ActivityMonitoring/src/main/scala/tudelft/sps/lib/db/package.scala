@@ -2,19 +2,16 @@ package tudelft.sps.lib
 
 import java.io.File
 
-import android.content.{ContentValues, Context}
+import android.content.{Context, ContentValues}
 import android.database.Cursor
-import android.database.sqlite.{SQLiteDatabase, SQLiteOpenHelper}
-import android.os.Environment
-import android.util.Log
+import android.database.sqlite.{SQLiteOpenHelper, SQLiteDatabase}
 import rx.lang.scala.Observable
-import scala.concurrent.ExecutionContext.Implicits._
 
 /**
  * following is an example of how the database works:
  *
  *
-    ObservableDBHelper(this, dbName, dbVersion, createQuery).getWritableDatabase(){ db =>
+ObservableDBHelper(this, dbName, dbVersion, createQuery).getWritableDatabase(){ db =>
           db.transaction{
             db.rawQuery(s"DELETE FROM $vectorTable", null)
             for{
@@ -143,4 +140,3 @@ package object db{
 
 
 }
-
