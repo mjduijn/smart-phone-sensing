@@ -138,14 +138,14 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/medAcc"
-                    android:id="@+id/labelMedAcc"
+                    android:text="@string/alphaTrimAcc"
+                    android:id="@+id/labelAlphaTrimAcc"
                     android:layout_weight="1" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/textMedAcc"
+                    android:id="@+id/textAlphaTrimAcc"
                     android:layout_weight="1" />
             </LinearLayout>
         </LinearLayout>

@@ -125,7 +125,7 @@ class MotionModelActivity extends Activity
       .observeOn(UIThreadScheduler(this))
       .subscribe(x => textAvgAcc.setText("%.3f".format(x)))
 
-    val textAlphaTrimmerAcc = findViewById(R.id.textMedAcc).asInstanceOf[TextView]
+    val textAlphaTrimmerAcc = findViewById(R.id.textAlphaTrimAcc).asInstanceOf[TextView]
     magnitudes
       .map(SeqMath.alphaTrimmer(_, 0.1))
       .observeOn(UIThreadScheduler(this))

@@ -11,6 +11,6 @@
     <string name="queueing">Queueing</string>
     <string name="samplingRate">Sampling rate</string>
     <string name="stdevAcc">Stdev Acc</string>
-    <string name="medAcc">Med Acc</string>
+    <string name="alphaTrimAcc">AlphaT Acc</string>
     <string name="avgAcc">Avg Acc</string>
 </resources>
