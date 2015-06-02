@@ -10,6 +10,7 @@ import android.view.View.OnClickListener
 import android.widget.ImageView.ScaleType
 import android.widget.{ImageView, Button, TextView}
 import com.androidplot.xy.{BoundaryMode, LineAndPointFormatter, XYPlot, SimpleXYSeries}
+import tudelft.sps.statistics.{Classifier, Knn}
 import scala.collection.JavaConverters._
 import scala.concurrent.duration._
 import rx.lang.scala.{Subscriber, Observable}
@@ -91,7 +92,7 @@ class MotionModelActivity extends Activity
   )
 
   var database:ObservableDBHelper = null
-
+  var classifier:Classifier[KnnData, Int] = null
 
   override def onCreate(savedInstanceState: Bundle): Unit = {
     super.onCreate(savedInstanceState)
@@ -102,8 +103,19 @@ class MotionModelActivity extends Activity
     plot.setRangeBoundaries(0, 1, BoundaryMode.FIXED)
     series = new SimpleXYSeries("AutoCorrelation")
     plot.addSeries(series, new LineAndPointFormatter())
-  }
 
+
+    val mapping: CursorSelector => KnnData = c => KnnData(c.getDouble("stdev"), c.getDouble("alpha"))
+
+    val data = database.getReadableDatabase(){ db =>
+      val walks = db.mapped(mapping)(s"SELECT * FROM $walkTable", null)
+        .map((_, 1))
+      val queues = db.mapped(mapping)(s"SELECT * FROM $queueTable", null)
+        .map((_, 0))
+      (KnnData.empty, 0) :: (walks.merge(queues).toBlocking.toList)
+    }
+    classifier = Knn.traversableToKnn(data).toKnn(5, (a, b) => a.distance(b))
+  }
 
   override def onResume(): Unit = {
     super.onResume()
@@ -117,17 +129,26 @@ class MotionModelActivity extends Activity
       }
 
     val textStepInterval = findViewById(R.id.textStepInterval).asInstanceOf[TextView]
-    autoCorrelation
-      .observeOn(UIThreadScheduler(this))
-      .subscribeRunning{
-        x => textStepInterval.setText("%d tau".format(x._1))
-      }
+    val tau = autoCorrelation
+      .observeOn(ExecutionContextScheduler(global))
+      .doOnEach(x => Log.d(TAG, "autoCorrelation: " + x))
+      .filter(_._2 > 0.7)
+      .map(_._1)
+      .merge(Observable.just(60))
+      .slider(20)
+      .map(_.mean)
+
+    tau
+    .observeOn(UIThreadScheduler(this))
+    .subscribeRunning{x =>
+      textStepInterval.setText("%d tau".format(x))
+    }
 
     val magnitudes =
       accelerometer
       .observeOn(ExecutionContextScheduler(global))
       .map(_.magnitude)
-      .slidingBuffer(50, 10)
+      .slidingBuffer(20, 5)
 
     val textStdevAcc = findViewById(R.id.textStdevAcc).asInstanceOf[TextView]
     //    autoCorrelation
@@ -166,33 +187,20 @@ class MotionModelActivity extends Activity
       }
     
     val textState = findViewById(R.id.textState).asInstanceOf[TextView]
-//    val chiThres = 0.7
-//    val stdevThres = 0.3
-//    autoCorrelation
-//      .filter{case (tau, chi, stdev) => chi > chiThres || stdev < stdevThres}
-//      .map{case (tau, chi, stdev) => if (stdev < stdevThres) "Queueing" else "Walking"}
-//      .distinctUntilChanged
-//      .observeOn(UIThreadScheduler(this))
-//      .subscribeRunning{ x =>
-//        textState.setText(x)
-//      }
+    magnitudes
+    .map{values =>
+      val stdev = values.stdev
+      val alpha = SeqMath.alphaTrimmer(values, 0.1)
+      val classification = classifier.classify(KnnData(stdev, alpha))
+      if(classification == 0) "Queueing" else "Walking"
+    }
+    .slidingBuffer(3, 1)
+    .map{ x =>
+      if(x.count(_.equals("Walking")) > 1) "Walking" else "Queueing"
+    }
+    .observeOn(UIThreadScheduler(this))
+    .subscribeRunning(textState.setText(_))
 
-    val stdevMin = 0.3
-    val stdevMax = 0.9
-
-    val stdevAcc = accelerometer
-      .map(_.magnitude)
-      .slidingBuffer(10, 1)
-      .map(SeqMath.stdev)
-      .observeOn(UIThreadScheduler(this))
-      .foreach { x =>
-        textStdevAcc.setText("%.3f".format(x))
-        if (x < stdevMin) {
-          textState.setText("Queueing")
-        } else if (x > stdevMax) {
-          textState.setText("Walking")
-        }
-      }
 
     /////Learned metrics part
     val btnStartStop = findViewById(R.id.btn_start_stop).asInstanceOf[Button]

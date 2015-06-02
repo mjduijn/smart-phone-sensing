@@ -62,7 +62,7 @@ package object db{
 
   implicit class SQLiteDatabaseExtensions(val db:SQLiteDatabase) extends AnyVal {
 
-    def apply(action: SQLiteDatabase => Unit): Unit ={
+    def apply[A](action: SQLiteDatabase => A):A ={
       try{
         action(db)
       } finally{
