@@ -102,12 +102,34 @@ class MotionModelActivity extends Activity
         x => textStepInterval.setText("%d tau".format(x._1))
       }
 
+    val magnitudes =
+      accelerometer
+      .observeOn(ExecutionContextScheduler(global))
+      .map(_.magnitude)
+      .slidingBuffer(50, 10)
+
     val textStdevAcc = findViewById(R.id.textStdevAcc).asInstanceOf[TextView]
-    autoCorrelation
+    //    autoCorrelation
+    //      .observeOn(UIThreadScheduler(this))
+    //      .subscribeRunning{ x =>
+    //        textStdevAcc.setText("%.3f".format(x._3))
+    //      }
+    magnitudes
+      .map(SeqMath.stdev(_))
       .observeOn(UIThreadScheduler(this))
-      .subscribeRunning{ x =>
-        textStdevAcc.setText("%.3f".format(x._3))
-      }
+      .subscribe(x => textStdevAcc.setText("%.3f".format(x)))
+
+    val textAvgAcc = findViewById(R.id.textAvgAcc).asInstanceOf[TextView]
+    magnitudes
+      .map(SeqMath.mean(_))
+      .observeOn(UIThreadScheduler(this))
+      .subscribe(x => textAvgAcc.setText("%.3f".format(x)))
+
+    val textAlphaTrimmerAcc = findViewById(R.id.textMedAcc).asInstanceOf[TextView]
+    magnitudes
+      .map(SeqMath.alphaTrimmer(_, 0.1))
+      .observeOn(UIThreadScheduler(this))
+      .subscribe(x => textAlphaTrimmerAcc.setText("%.3f".format(x)))
 
     val textSamplingRate = findViewById(R.id.textSamplingRate).asInstanceOf[TextView]
     accelerometer
