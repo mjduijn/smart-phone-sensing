@@ -35,8 +35,8 @@ class MotionModelActivity extends Activity
   var plot:XYPlot = null
   var series:SimpleXYSeries = null
 
-  val tMin = 40
-  val tMax = 90
+  val tMin = 20
+  val tMax = 50
 
   val autoCorrelation = accelerometer
     .observeOn(ExecutionContextScheduler(global))
@@ -122,27 +122,23 @@ class MotionModelActivity extends Activity
 
     autoCorrelation
       .slider(20)
-      .observeOn(UIThreadScheduler(this))
+      .observeOn(ExecutionContextScheduler(global))
       .subscribeRunning { seq =>
         series.setModel(seq.map(_._2.asInstanceOf[java.lang.Double]).asJava, SimpleXYSeries.ArrayFormat.Y_VALS_ONLY)
         plot.redraw()
       }
 
     val textStepInterval = findViewById(R.id.textStepInterval).asInstanceOf[TextView]
-    val tau = autoCorrelation
+      ((30, 1d, 0d) +: autoCorrelation)
       .observeOn(ExecutionContextScheduler(global))
-      .doOnEach(x => Log.d(TAG, "autoCorrelation: " + x))
       .filter(_._2 > 0.7)
       .map(_._1)
-      .merge(Observable.just(60))
       .slider(20)
       .map(_.mean)
-
-    tau
-    .observeOn(UIThreadScheduler(this))
-    .subscribeRunning{x =>
-      textStepInterval.setText("%d tau".format(x))
-    }
+      .observeOn(UIThreadScheduler(this))
+      .subscribeRunning{x =>
+        textStepInterval.setText("%.2f tau".format(x))
+      }
 
     val magnitudes =
       accelerometer
