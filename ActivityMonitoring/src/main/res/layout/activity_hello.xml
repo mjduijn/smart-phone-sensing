@@ -26,14 +26,14 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <Button
-            android:id="@+id/btn_learn_queuing"
+            android:id="@+id/btn_learn_queuing_nope"
             android:text="Learn queuing"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_weight="1"/>
         <Button
-            android:id="@+id/btn_learn_walking"
+            android:id="@+id/btn_learn_walking_nope"
             android:text="Learn walking"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

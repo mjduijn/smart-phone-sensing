@@ -226,14 +226,10 @@ class MotionModelActivity extends Activity
         }
       }
 
-    val btnTrainWalking = findViewById(R.id.btn_learn_walking).asInstanceOf[Button]
-    train(btnTrainWalking.onClick.toggle(false, true).doOnEach(b => {
-      btnTrainWalking.setText(if(b) "Stop Training" else "Train Walking")
-      Log.d(TAG, "BUTTON TOGGLE: " + b)
-    }), walkTable)
-    val btnTrainQueueing = findViewById(R.id.btn_learn_queuing).asInstanceOf[Button]
-    train(btnTrainQueueing.onClick.toggle(false, true).doOnEach(b => btnTrainWalking.setText(if(b) "Stop Training" else "Train Queueing")), queueTable)
-
+    val btnTrainWalking = findViewById(R.id.btn_train_walking).asInstanceOf[Button]
+    train(btnTrainWalking.onClick.toggle(false, true).doOnEach(b => btnTrainWalking.setText(if(b) "Stop Training" else "Train Walking")), walkTable)
+    val btnTrainQueueing = findViewById(R.id.btn_train_queueing).asInstanceOf[Button]
+    train(btnTrainQueueing.onClick.toggle(false, true).doOnEach(b => btnTrainQueueing.setText(if(b) "Stop Training" else "Train Queueing")), queueTable)
 
     val walkingObs = Observable((aSubscriber: Subscriber[String]) => {
       btnWalking.setOnClickListener(new OnClickListener {

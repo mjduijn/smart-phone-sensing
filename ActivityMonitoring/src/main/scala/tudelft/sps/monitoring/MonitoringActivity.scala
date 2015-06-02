@@ -175,7 +175,7 @@ class MonitoringActivity extends Activity
       .merge(Observable.interval(1 second))
       .subscribeRunning(_ => startWifiscan())
 
-    val btnLearnWalking = findViewById(R.id.btn_learn_walking).asInstanceOf[Button]
+    val btnLearnWalking = findViewById(R.id.btn_learn_walking_nope).asInstanceOf[Button]
 
     //Add learn walking onclick listener
     Observable((aSubscriber: Subscriber[Int]) => {
@@ -213,7 +213,7 @@ class MonitoringActivity extends Activity
 
 
 
-    val btnLearnQueuing = findViewById(R.id.btn_learn_queuing).asInstanceOf[Button]
+    val btnLearnQueuing = findViewById(R.id.btn_learn_queuing_nope).asInstanceOf[Button]
     //Add learn queuing onclick listener
     Observable((aSubscriber: Subscriber[Int]) => {
       btnLearnQueuing.setOnClickListener(new OnClickListener {
