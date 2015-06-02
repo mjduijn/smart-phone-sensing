@@ -215,7 +215,7 @@ class MotionModelActivity extends Activity
       .filter(_._1)
       .map(_._2)
 //      .slidingBuffer(50, 10)
-      .foreach{ points =>
+      .subscribeRunning{ points =>
         val stdev = points.stdev
         val alpha = SeqMath.alphaTrimmer(points, 0.1)
         database.getWritableDatabase(){ db =>
@@ -227,7 +227,10 @@ class MotionModelActivity extends Activity
       }
 
     val btnTrainWalking = findViewById(R.id.btn_learn_walking).asInstanceOf[Button]
-    train(btnTrainWalking.onClick.toggle(false, true).doOnEach({b => btnTrainWalking.setText(if(b) "Stop Training" else "Train Walking")), walkTable)
+    train(btnTrainWalking.onClick.toggle(false, true).doOnEach(b => {
+      btnTrainWalking.setText(if(b) "Stop Training" else "Train Walking")
+      Log.d(TAG, "BUTTON TOGGLE: " + b)
+    }), walkTable)
     val btnTrainQueueing = findViewById(R.id.btn_learn_queuing).asInstanceOf[Button]
     train(btnTrainQueueing.onClick.toggle(false, true).doOnEach(b => btnTrainWalking.setText(if(b) "Stop Training" else "Train Queueing")), queueTable)
 
