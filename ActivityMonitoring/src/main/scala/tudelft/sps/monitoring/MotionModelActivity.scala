@@ -97,7 +97,7 @@ class MotionModelActivity extends Activity
     super.onCreate(savedInstanceState)
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     setContentView(R.layout.activity_motion_model)
-    database = ObservableDBHelper(this, "MotionModel", 1, dbCreateQuery)
+    database = ObservableDBHelper(this, "MotionModel.db", 1, dbCreateQuery)
     plot = findViewById(R.id.plot).asInstanceOf[XYPlot]
     plot.setRangeBoundaries(0, 1, BoundaryMode.FIXED)
     series = new SimpleXYSeries("AutoCorrelation")
@@ -210,7 +210,7 @@ class MotionModelActivity extends Activity
 
     def train(obs:Observable[Boolean], table:String): Unit = obs
       .observeOn(ExecutionContextScheduler(global))
-      .doOnEach(if(_){database.getWritableDatabase().delete(queueTable, null, null)})
+      .doOnEach(if(_){database.getWritableDatabase().delete(table, null, null)})
       .combineLatestWith(magnitudes)((b, e) => (b, e))
       .filter(_._1)
       .map(_._2)
