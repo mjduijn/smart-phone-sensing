@@ -16,7 +16,6 @@
             android:name="tudelft.sps.monitoring.MonitoringActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait">
-
         </activity>
 
         <activity
@@ -30,6 +29,11 @@
             </intent-filter>
 
         </activity>
+
+        <activity
+            android:name="tudelft.sps.monitoring.SettingsActivity"
+            android:label="@string/app_name"
+        />
 
     </application>
 

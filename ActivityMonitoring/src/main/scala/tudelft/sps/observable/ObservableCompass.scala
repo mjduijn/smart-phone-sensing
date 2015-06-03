@@ -10,7 +10,7 @@ import rx.lang.scala.subjects.PublishSubject
 trait ObservableCompass extends Activity{
 
   private val sensorChangedSubject = PublishSubject[Float]()
-  val compass:Observable[Float] = sensorChangedSubject
+  val compass:Observable[Float] = sensorChangedSubject.onBackpressureDrop
 
   private var sensorManager:SensorManager = null
   private var compassSensor:Sensor = null
@@ -56,6 +56,8 @@ trait ObservableCompass extends Activity{
         }
       }
     }
+
+
 
     override def onAccuracyChanged(p1: Sensor, p2: Int): Unit = {}
   }

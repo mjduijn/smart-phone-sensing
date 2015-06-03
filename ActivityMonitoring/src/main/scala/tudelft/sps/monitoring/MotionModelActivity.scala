@@ -1,16 +1,16 @@
 package tudelft.sps.monitoring
 
 import android.app.Activity
+import android.content.Intent
 import android.graphics._
 import android.os.{PersistableBundle, Bundle}
 import android.preference.PreferenceManager
 import android.util.Log
-import android.view.{WindowManager, View}
+import android.view.{Menu, WindowManager, View}
 import android.view.View.OnClickListener
 import android.widget.ImageView.ScaleType
 import android.widget.{ImageView, Button, TextView}
 import com.androidplot.xy.{BoundaryMode, LineAndPointFormatter, XYPlot, SimpleXYSeries}
-import tudelft.sps.monitoring.MotionModelActivity
 import tudelft.sps.statistics.{Classifier, Knn}
 import scala.collection.JavaConverters._
 import scala.concurrent.duration._
@@ -128,6 +128,8 @@ class MotionModelActivity extends Activity
 
   override def onResume(): Unit = {
     super.onResume()
+
+    val prefs = PreferenceManager.getDefaultSharedPreferences(this)
 
     autoCorrelation
       .slider(20)
@@ -299,8 +301,11 @@ class MotionModelActivity extends Activity
     case class MovementData(compass:Float, state:MotionState, tau:Double)
 
 
-    val angleDiff = 25/180 * Math.PI
+
+    val angleDiff = (prefs.getInt("angleOffset", 0).toFloat / 180) * Math.PI
+    val strideLength = prefs.getInt("strideLength", 600)
     val movementData = compass
+      .observeOn(ExecutionContextScheduler(global))
       .combineLatest(motionState)
       .combineLatest(tau)
       .sample(200 millis)
@@ -309,7 +314,8 @@ class MotionModelActivity extends Activity
     movementData
       .filter(_.state.equals(MotionState.Walking))
       .doOnEach{ data =>
-        floormap.move(1, (data.compass + angleDiff).toFloat)
+        Log.d(TAG, "new movement data: " + movementData)
+        floormap.move(strideLength, (data.compass + angleDiff).toFloat)
         canvas.drawColor(Color.WHITE)
         paint.setColor(Color.BLACK)
         for (i <- lines.indices) {
@@ -334,9 +340,17 @@ class MotionModelActivity extends Activity
         iv.invalidate()
       }
 
+    val btnSettings = findViewById(R.id.btn_settings).asInstanceOf[Button]
+    btnSettings.onClick.subscribeRunning{ x =>
+      val intent = new Intent(this, classOf[SettingsActivity])
+      startActivity(intent)
+    }
+
     val textCompass = findViewById(R.id.textCompass).asInstanceOf[TextView]
     compass.subscribeRunning{ x =>
-      textCompass.setText("%.2f".format(x))
+      textCompass.setText("%.2f".format(x + angleDiff))
     }
   }
+
+
 }

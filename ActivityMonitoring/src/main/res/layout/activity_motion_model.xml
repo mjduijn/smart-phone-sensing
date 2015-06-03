@@ -224,6 +224,13 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_weight="1" />
+            <Button
+                android:id="@+id/btn_settings"
+                android:text="Settings"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_weight="1" />
         </LinearLayout>
         <TableLayout
             android:layout_width="match_parent"
