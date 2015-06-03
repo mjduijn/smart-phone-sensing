@@ -10,6 +10,7 @@ import android.view.View.OnClickListener
 import android.widget.ImageView.ScaleType
 import android.widget.{ImageView, Button, TextView}
 import com.androidplot.xy.{BoundaryMode, LineAndPointFormatter, XYPlot, SimpleXYSeries}
+import tudelft.sps.monitoring.MotionModelActivity
 import tudelft.sps.statistics.{Classifier, Knn}
 import scala.collection.JavaConverters._
 import scala.concurrent.duration._
@@ -29,6 +30,7 @@ class MotionModelActivity extends Activity
   with ManagedSubscriptions
   with ObservableCompass
 {
+
   val TAG = "MotionModelActivity"
 
 
@@ -37,6 +39,13 @@ class MotionModelActivity extends Activity
 
   val tMin = 20
   val tMax = 50
+
+  import MotionState.MotionState
+  object MotionState extends Enumeration{
+    type MotionState = Value
+    val Walking = Value("Walking")
+    val Queueing = Value("Queueing")
+  }
 
   val autoCorrelation = accelerometer
     .observeOn(ExecutionContextScheduler(global))
@@ -92,7 +101,7 @@ class MotionModelActivity extends Activity
   )
 
   var database:ObservableDBHelper = null
-  var classifier:Classifier[KnnData, Int] = null
+  var classifier:Classifier[KnnData, MotionState] = null
 
   override def onCreate(savedInstanceState: Bundle): Unit = {
     super.onCreate(savedInstanceState)
@@ -109,10 +118,10 @@ class MotionModelActivity extends Activity
 
     val data = database.getReadableDatabase(){ db =>
       val walks = db.mapped(mapping)(s"SELECT * FROM $walkTable", null)
-        .map((_, 1))
+        .map((_, MotionState.Walking))
       val queues = db.mapped(mapping)(s"SELECT * FROM $queueTable", null)
-        .map((_, 0))
-      (KnnData.empty, 0) :: (walks.merge(queues).toBlocking.toList)
+        .map((_, MotionState.Queueing))
+      (KnnData.empty, MotionState.Queueing) :: (walks.merge(queues).toBlocking.toList)
     }
     classifier = Knn.traversableToKnn(data).toKnn(5, (a, b) => a.distance(b))
   }
@@ -128,13 +137,18 @@ class MotionModelActivity extends Activity
         plot.redraw()
       }
 
+
     val textStepInterval = findViewById(R.id.textStepInterval).asInstanceOf[TextView]
-      ((30, 1d, 0d) +: autoCorrelation)
+
+
+    val tau = ((30, 1d, 0d) +: autoCorrelation)
       .observeOn(ExecutionContextScheduler(global))
       .filter(_._2 > 0.7)
       .map(_._1)
       .slider(20)
-      .map(_.mean)
+      .map(x => SeqMath.alphaTrimmer(x.map(_.toDouble), 0.2))
+
+    tau
       .observeOn(UIThreadScheduler(this))
       .subscribeRunning{x =>
         textStepInterval.setText("%.2f tau".format(x))
@@ -181,21 +195,22 @@ class MotionModelActivity extends Activity
         val hertz = 1000 / diff.mean
         textSamplingRate.setText("%.1fHz".format(hertz))
       }
-    
-    val textState = findViewById(R.id.textState).asInstanceOf[TextView]
-    magnitudes
+
+    val motionState = magnitudes
     .map{values =>
       val stdev = values.stdev
       val alpha = SeqMath.alphaTrimmer(values, 0.1)
-      val classification = classifier.classify(KnnData(stdev, alpha))
-      if(classification == 0) "Queueing" else "Walking"
+      classifier.classify(KnnData(stdev, alpha))
     }
     .slidingBuffer(3, 1)
     .map{ x =>
-      if(x.count(_.equals("Walking")) > 1) "Walking" else "Queueing"
+      if(x.count(_.equals(MotionState.Walking)) > 1) MotionState.Walking else MotionState.Queueing
     }
-    .observeOn(UIThreadScheduler(this))
-    .subscribeRunning(textState.setText(_))
+
+    val textState = findViewById(R.id.textState).asInstanceOf[TextView]
+    motionState
+      .observeOn(UIThreadScheduler(this))
+      .subscribeRunning(x => textState.setText(x.toString))
 
 
     /////Learned metrics part
@@ -280,21 +295,22 @@ class MotionModelActivity extends Activity
 
 //    var angle:Float = 0.0f
 
-    compass
-      .onBackpressureDrop
-      .observeOn(ExecutionContextScheduler(global))
-      .sample(1000 millis)
 
-//    Observable.interval(1000 millis, ExecutionContextScheduler(global))
-//      .combineLatestWith(compass)
-      .doOnEach((angle) => {
+    case class MovementData(compass:Float, state:MotionState, tau:Double)
 
-//        canvas.save(Canvas.MATRIX_SAVE_FLAG)
-//        canvas.rotate(90, -143/2 , -720/2)
 
+    val angleDiff = 25/180 * Math.PI
+    val movementData = compass
+      .combineLatest(motionState)
+      .combineLatest(tau)
+      .sample(200 millis)
+      .map(x => MovementData(x._1._1, x._1._2, x._2))
+
+    movementData
+      .filter(_.state.equals(MotionState.Walking))
+      .doOnEach{ data =>
+        floormap.move(1, (data.compass + angleDiff).toFloat)
         canvas.drawColor(Color.WHITE)
-      
-
         paint.setColor(Color.BLACK)
         for (i <- lines.indices) {
           canvas.drawLine(lines(i).x0 / 100, lines(i).y0 / 100, lines(i).x1 / 100, lines(i).y1 / 100, paint)
@@ -308,18 +324,19 @@ class MotionModelActivity extends Activity
         for(d <- floormap.deadZones){
           canvas.drawCircle(d._1 / 100, d._2 /100, 10, paint)
         }
-
-        floormap.move(1000, angle)
         paint.setColor(Color.BLUE)
         for(p <- floormap.particles) {
           canvas.drawPoint(p.x / 100, p.y / 100, paint)
         }
-//        canvas.restore()
-      })
+      }
       .observeOn(UIThreadScheduler(this))
-      .foreach((_) => iv.invalidate())
+      .subscribeRunning{ data =>
+        iv.invalidate()
+      }
 
-    //compass.foreach(x => println(x))
-
+    val textCompass = findViewById(R.id.textCompass).asInstanceOf[TextView]
+    compass.subscribeRunning{ x =>
+      textCompass.setText("%.2f".format(x))
+    }
   }
 }

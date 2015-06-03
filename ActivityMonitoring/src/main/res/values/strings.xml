@@ -13,4 +13,5 @@
     <string name="stdevAcc">Stdev Acc</string>
     <string name="alphaTrimAcc">AlphaT Acc</string>
     <string name="avgAcc">Avg Acc</string>
+    <string name="compass">Compass</string>
 </resources>

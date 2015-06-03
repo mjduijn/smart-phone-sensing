@@ -13,7 +13,6 @@ object SeqExtensions{
     }
     def stdev:Double = Math.sqrt(variance)
     def median:A = seq.sorted.apply(seq.size / 2)
-
   }
 
   object SeqMath {
