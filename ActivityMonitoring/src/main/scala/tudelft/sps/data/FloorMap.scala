@@ -44,12 +44,12 @@ class FloorMap(
 
     println(angle)
     for(i <- current.indices) {
+      //TODO paper says compass error should be Gaussian
+      val compassAngle = angle + (random.nextFloat() - 0.5) * angle
       val strideLengthError = ((random.nextInt(strideLength * 2) - strideLength) * 0.1).toInt // delta_i up to 10% of stride length
       val stride = strideLength + strideLengthError
-      old(i).x = (current(i).x + stride * Math.cos(placementOffset + compassError + angle)).toInt
-      old(i).y = (current(i).y + stride * Math.sin(placementOffset + compassError + angle)).toInt
-
-
+      old(i).x = (current(i).x + stride * Math.cos(compassAngle)).toInt
+      old(i).y = (current(i).y + stride * Math.sin(compassAngle)).toInt
 
       for{
         wall <- walls if wall.doLinesIntersect(old(i).x, current(i).x, old(i).y, current(i).y)
