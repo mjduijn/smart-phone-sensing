@@ -9,8 +9,8 @@ import rx.lang.scala.subjects.PublishSubject
 
 trait ObservableCompass extends Activity{
 
-  private val sensorChangedSubject = PublishSubject[Float]()
-  val compass:Observable[Float] = sensorChangedSubject.onBackpressureDrop
+  private val sensorChangedSubject = PublishSubject[Double]()
+  val compass:Observable[Double] = sensorChangedSubject.onBackpressureDrop
 
   private var sensorManager:SensorManager = null
 //  private var compassSensor:Sensor = null
@@ -48,9 +48,8 @@ trait ObservableCompass extends Activity{
     override def onSensorChanged(event: SensorEvent): Unit = {
       if(event.sensor.getType() == Sensor.TYPE_ORIENTATION) {
         val degree = event.values(0)
-        println("New heading: " + degree)
-
-        sensorChangedSubject.onNext(degree)
+        val radians = Math.toRadians(degree) - Math.PI
+        sensorChangedSubject.onNext(radians)
       }
 
 //      if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {

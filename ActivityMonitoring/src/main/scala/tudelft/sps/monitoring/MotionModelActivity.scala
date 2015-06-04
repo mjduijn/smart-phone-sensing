@@ -298,7 +298,7 @@ class MotionModelActivity extends Activity
 //    var angle:Float = 0.0f
 
 
-    case class MovementData(compass:Float, state:MotionState, tau:Double)
+    case class MovementData(compass:Double, state:MotionState, tau:Double)
 
 
 
@@ -356,7 +356,7 @@ class MotionModelActivity extends Activity
 
     val textCompass = findViewById(R.id.textCompass).asInstanceOf[TextView]
     compass.subscribeRunning{ x =>
-
+      /*
       var angle = x + angleDiff
       while(angle < -Math.PI) {
         angle += 2 * Math.PI
@@ -364,8 +364,9 @@ class MotionModelActivity extends Activity
       while(angle > Math.PI) {
         angle -= 2 * Math.PI
       }
+      */
 
-      textCompass.setText("%.2f".format(angle))
+      textCompass.setText("%.2f".format(x))
     }
   }
 
