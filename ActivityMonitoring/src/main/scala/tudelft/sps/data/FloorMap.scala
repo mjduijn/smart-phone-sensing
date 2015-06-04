@@ -11,6 +11,11 @@ class FloorMap(
 ){
   private val particles1 = new Array[Particle](particleCount)
   private val particles2 = new Array[Particle](particleCount)
+  private val deadOrAliveParticles = new Array[Particle](particleCount)
+
+  private var aliveCount = 0
+  private var deadCount = deadOrAliveParticles.length - 1
+
   private val random = new Random()
 
   private var current = particles1
@@ -23,10 +28,12 @@ class FloorMap(
   }
 
   for(i <- 0 until particleCount){
-    var randomParticle = Particle(random.nextInt(width + 1), random.nextInt(height + 1), 0, 0)
+
+
+    var randomParticle = Particle(random.nextInt(width + 1), random.nextInt(height + 1), (random.nextDouble() - 0.5) * 0.2, (random.nextDouble() - 0.5) * 0.5)
 
     while(deadZones.exists{case (x,y) => !walls.exists(wall => wall.doLinesIntersect(x, randomParticle.x, y, randomParticle.y))}){
-      randomParticle = Particle(random.nextInt(width + 1), random.nextInt(height + 1), 0, 0)
+      randomParticle = Particle(random.nextInt(width + 1), random.nextInt(height + 1), (random.nextDouble() - 0.5) * 0.2, (random.nextDouble() - 0.5) * 0.5)
     }
 //    println("Generated particle")
     particles1(i) = randomParticle
@@ -38,29 +45,41 @@ class FloorMap(
    * @param strideLength length of stride in mm
    */
   def move(strideLength: Int, angle: Float) = {
-    val compassError = 0.0 // beta_i TODO should be a gaussian error
-    val placementOffset = 0.0 //alpha_i since phone is kept straight ahead, should always be 0
-//    val angleRad = ((angle * Math.PI) / 180)
-
-    println(angle)
-    for(i <- current.indices) {
+    deadCount = deadOrAliveParticles.length - 1
+    aliveCount = 0
+    for (i <- current.indices) {
       //TODO paper says compass error should be Gaussian
-      val compassAngle = angle + (random.nextFloat() - 0.5) * angle
-      val strideLengthError = ((random.nextInt(strideLength * 2) - strideLength) * 0.1).toInt // delta_i up to 10% of stride length
-      val stride = strideLength + strideLengthError
+
+      var compassAngle = angle + Math.PI * current(i).compassError
+      while (compassAngle < -Math.PI) {
+        compassAngle += 2 * Math.PI
+      }
+      while (compassAngle > Math.PI) {
+        compassAngle -= 2 * Math.PI
+      }
+      val stride = strideLength + strideLength * current(i).strideError
       old(i).x = (current(i).x + stride * Math.cos(compassAngle)).toInt
       old(i).y = (current(i).y + stride * Math.sin(compassAngle)).toInt
 
-      for{
-        wall <- walls if wall.doLinesIntersect(old(i).x, current(i).x, old(i).y, current(i).y)
-      }{
-        val randomPoint = random.nextInt(particleCount)
-        old(i).x = current(randomPoint).x
-        old(i).y = current(randomPoint).y
+      if (walls.exists(wall => wall.doLinesIntersect(old(i).x, current(i).x, old(i).y, current(i).y))) {
+        deadOrAliveParticles(deadCount) = old(i)
+        deadCount -= 1
+      } else {
+        deadOrAliveParticles(aliveCount) = old(i)
+        aliveCount += 1
       }
     }
+    if(aliveCount > 0){
+      for(i <- deadCount until deadOrAliveParticles.length){
+        val randomPoint = random.nextInt(aliveCount)
+        deadOrAliveParticles(i).x = deadOrAliveParticles(randomPoint).x
+        deadOrAliveParticles(i).y = deadOrAliveParticles(randomPoint).y
+      }
+    }
+
     swap()
   }
+
 }
 
 object FloorMap{

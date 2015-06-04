@@ -131,13 +131,13 @@ class MotionModelActivity extends Activity
 
     val prefs = PreferenceManager.getDefaultSharedPreferences(this)
 
-    autoCorrelation
-      .slider(20)
-      .observeOn(ExecutionContextScheduler(global))
-      .subscribeRunning { seq =>
-        series.setModel(seq.map(_._2.asInstanceOf[java.lang.Double]).asJava, SimpleXYSeries.ArrayFormat.Y_VALS_ONLY)
-        plot.redraw()
-      }
+//    autoCorrelation
+//      .slider(20)
+//      .observeOn(ExecutionContextScheduler(global))
+//      .subscribeRunning { seq =>
+//        series.setModel(seq.map(_._2.asInstanceOf[java.lang.Double]).asJava, SimpleXYSeries.ArrayFormat.Y_VALS_ONLY)
+//        plot.redraw()
+//      }
 
 
     val textStepInterval = findViewById(R.id.textStepInterval).asInstanceOf[TextView]
@@ -302,8 +302,8 @@ class MotionModelActivity extends Activity
 
 
 
-    val angleDiff = (prefs.getInt("angleOffset", 0).toFloat / 180) * Math.PI
-    val strideLength = prefs.getInt("strideLength", 600)
+    val angleDiff = (prefs.getString("angleOffset", "0").toFloat / 180) * Math.PI
+    val strideLength = prefs.getString("strideLength", "600").toInt
     val movementData = compass
       .observeOn(ExecutionContextScheduler(global))
       .combineLatest(motionState)
@@ -315,7 +315,15 @@ class MotionModelActivity extends Activity
       .filter(_.state.equals(MotionState.Walking))
       .doOnEach{ data =>
         Log.d(TAG, "new movement data: " + movementData)
-        floormap.move(strideLength, (data.compass + angleDiff).toFloat)
+        var angle = data.compass + angleDiff
+        while(angle < -Math.PI) {
+          angle += 2 * Math.PI
+        }
+        while(angle > Math.PI) {
+          angle -= 2 * Math.PI
+        }
+        floormap.move(strideLength, angle.toFloat)
+
         canvas.drawColor(Color.WHITE)
         paint.setColor(Color.BLACK)
         for (i <- lines.indices) {
@@ -348,7 +356,16 @@ class MotionModelActivity extends Activity
 
     val textCompass = findViewById(R.id.textCompass).asInstanceOf[TextView]
     compass.subscribeRunning{ x =>
-      textCompass.setText("%.2f".format(x + angleDiff))
+
+      var angle = x + angleDiff
+      while(angle < -Math.PI) {
+        angle += 2 * Math.PI
+      }
+      while(angle > Math.PI) {
+        angle -= 2 * Math.PI
+      }
+
+      textCompass.setText("%.2f".format(angle))
     }
   }
 
