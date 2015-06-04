@@ -30,10 +30,11 @@ class FloorMap(
   for(i <- 0 until particleCount){
 
 
-    var randomParticle = Particle(random.nextInt(width + 1), random.nextInt(height + 1), (random.nextDouble() - 0.5) * 0.2, (random.nextDouble() - 0.5) * 0.5)
+    var randomParticle = Particle(random.nextInt(width + 1), random.nextInt(height + 1), random.nextGaussian(), (random.nextDouble() - 0.5) * 0.5)
 
     while(deadZones.exists{case (x,y) => !walls.exists(wall => wall.doLinesIntersect(x, randomParticle.x, y, randomParticle.y))}){
-      randomParticle = Particle(random.nextInt(width + 1), random.nextInt(height + 1), (random.nextDouble() - 0.5) * 0.2, (random.nextDouble() - 0.5) * 0.5)
+//      randomParticle = Particle(random.nextInt(width + 1), random.nextInt(height + 1), (random.nextDouble() - 0.5) * 0.2, (random.nextDouble() - 0.5) * 0.5)
+      randomParticle = Particle(random.nextInt(width + 1), random.nextInt(height + 1), random.nextGaussian(), (random.nextDouble() - 0.5) * 0.5)
     }
 //    println("Generated particle")
     particles1(i) = randomParticle
