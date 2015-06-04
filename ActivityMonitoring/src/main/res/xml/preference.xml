@@ -4,7 +4,7 @@
         android:key="angleOffset"
         android:title="Angle Offset"
         android:numeric="decimal"
-        android:defaultValue="25"
+        android:defaultValue="0.0"
     />
 
     <EditTextPreference

@@ -11,10 +11,8 @@ class FloorMap(
 ){
   private val particles1 = new Array[Particle](particleCount)
   private val particles2 = new Array[Particle](particleCount)
-  private val deadOrAliveParticles = new Array[Particle](particleCount)
-
-  private var aliveCount = 0
-  private var deadCount = deadOrAliveParticles.length - 1
+  private val deadParticles = new Array[Particle](particleCount)
+  private val aliveParticles = new Array[Particle](particleCount)
 
   private val random = new Random()
 
@@ -33,16 +31,16 @@ class FloorMap(
     var randomParticle = Particle(
       x = random.nextInt(width + 1),
       y = random.nextInt(height + 1),
-      compassError = random.nextGaussian(),
+      compassError = (random.nextDouble() - 0.5) * 0.25,
       strideError = (random.nextDouble() - 0.5) * 0.5
     )
 
     while(deadZones.exists{case (x,y) => !walls.exists(wall => wall.doLinesIntersect(x, randomParticle.x, y, randomParticle.y))}){
-//      randomParticle = Particle(random.nextInt(width + 1), random.nextInt(height + 1), (random.nextDouble() - 0.5) * 0.2, (random.nextDouble() - 0.5) * 0.5)
       randomParticle = Particle(
         x = random.nextInt(width + 1),
         y = random.nextInt(height + 1),
-        compassError = random.nextGaussian(),
+//        compassError = random.nextGaussian(),
+        compassError = (random.nextDouble() - 0.5) * 0.25,
         strideError = (random.nextDouble() - 0.5) * 0.5
       )
     }
@@ -56,8 +54,8 @@ class FloorMap(
    * @param strideLength length of stride in mm
    */
   def move(strideLength: Int, angle: Float) = {
-    deadCount = deadOrAliveParticles.length - 1
-    aliveCount = 0
+    var deadCount = 0
+    var aliveCount = 0
     for (i <- current.indices) {
       //TODO paper says compass error should be Gaussian
 
@@ -73,19 +71,34 @@ class FloorMap(
       old(i).x = (current(i).x + stride * Math.cos(compassAngle)).toInt
       old(i).y = (current(i).y + stride * Math.sin(compassAngle)).toInt
 
+      var dead = false
+//      for(wall <- walls) {
+//        if(wall.doLinesIntersect(old(i).x, current(i).x, old(i).y, current(i).y)) {
+//          dead = true
+//        }
+//      }
       if (walls.exists(wall => wall.doLinesIntersect(old(i).x, current(i).x, old(i).y, current(i).y))) {
-        deadOrAliveParticles(deadCount) = old(i)
-        deadCount -= 1
+        dead = true
+      }
+
+      if(deadZones.exists{case (x,y) => !walls.exists(wall => wall.doLinesIntersect(x, old(i).x, y, old(i).y))}){
+        dead = true
+      }
+
+      //      if (walls.exists(wall => wall.doLinesIntersect(old(i).x, current(i).x, old(i).y, current(i).y))) {
+      if(dead) {
+        deadParticles(deadCount) = old(i)
+        deadCount += 1
       } else {
-        deadOrAliveParticles(aliveCount) = old(i)
+        aliveParticles(aliveCount) = current(i)
         aliveCount += 1
       }
     }
     if(aliveCount > 0){
-      for(i <- deadCount until deadOrAliveParticles.length){
+      for(i <- 0 until deadCount){
         val randomPoint = random.nextInt(aliveCount)
-        deadOrAliveParticles(i).x = deadOrAliveParticles(randomPoint).x
-        deadOrAliveParticles(i).y = deadOrAliveParticles(randomPoint).y
+        deadParticles(i).x = aliveParticles(randomPoint).x
+        deadParticles(i).y = aliveParticles(randomPoint).y
       }
     }
 
