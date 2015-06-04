@@ -30,11 +30,21 @@ class FloorMap(
   for(i <- 0 until particleCount){
 
 
-    var randomParticle = Particle(random.nextInt(width + 1), random.nextInt(height + 1), random.nextGaussian(), (random.nextDouble() - 0.5) * 0.5)
+    var randomParticle = Particle(
+      x = random.nextInt(width + 1),
+      y = random.nextInt(height + 1),
+      compassError = random.nextGaussian(),
+      strideError = (random.nextDouble() - 0.5) * 0.5
+    )
 
     while(deadZones.exists{case (x,y) => !walls.exists(wall => wall.doLinesIntersect(x, randomParticle.x, y, randomParticle.y))}){
 //      randomParticle = Particle(random.nextInt(width + 1), random.nextInt(height + 1), (random.nextDouble() - 0.5) * 0.2, (random.nextDouble() - 0.5) * 0.5)
-      randomParticle = Particle(random.nextInt(width + 1), random.nextInt(height + 1), random.nextGaussian(), (random.nextDouble() - 0.5) * 0.5)
+      randomParticle = Particle(
+        x = random.nextInt(width + 1),
+        y = random.nextInt(height + 1),
+        compassError = random.nextGaussian(),
+        strideError = (random.nextDouble() - 0.5) * 0.5
+      )
     }
 //    println("Generated particle")
     particles1(i) = randomParticle
@@ -58,6 +68,7 @@ class FloorMap(
       while (compassAngle > Math.PI) {
         compassAngle -= 2 * Math.PI
       }
+
       val stride = strideLength + strideLength * current(i).strideError
       old(i).x = (current(i).x + stride * Math.cos(compassAngle)).toInt
       old(i).y = (current(i).y + stride * Math.sin(compassAngle)).toInt

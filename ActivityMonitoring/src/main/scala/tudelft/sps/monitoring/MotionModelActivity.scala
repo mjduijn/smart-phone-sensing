@@ -302,7 +302,7 @@ class MotionModelActivity extends Activity
 
 
 
-    val angleDiff = (prefs.getString("angleOffset", "0").toFloat / 180) * Math.PI
+    val angleDiff = prefs.getString("angleOffset", "0").toDouble
     val strideLength = prefs.getString("strideLength", "600").toInt
     val movementData = compass
       .observeOn(ExecutionContextScheduler(global))
@@ -356,7 +356,7 @@ class MotionModelActivity extends Activity
 
     val textCompass = findViewById(R.id.textCompass).asInstanceOf[TextView]
     compass.subscribeRunning{ x =>
-      /*
+
       var angle = x + angleDiff
       while(angle < -Math.PI) {
         angle += 2 * Math.PI
@@ -364,9 +364,9 @@ class MotionModelActivity extends Activity
       while(angle > Math.PI) {
         angle -= 2 * Math.PI
       }
-      */
 
-      textCompass.setText("%.2f".format(x))
+
+      textCompass.setText("%.2f".format(angle))
     }
   }
 

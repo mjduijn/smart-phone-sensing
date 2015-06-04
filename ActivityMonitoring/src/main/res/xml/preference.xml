@@ -3,14 +3,14 @@
     <EditTextPreference
         android:key="angleOffset"
         android:title="Angle Offset"
-        android:numeric="integer"
+        android:numeric="decimal"
         android:defaultValue="25"
     />
 
     <EditTextPreference
         android:key="strideLength"
         android:title="Stride Length"
-        android:numeric="integer"
+        android:numeric="decimal"
         android:defaultValue="600"
     />
 </PreferenceScreen>

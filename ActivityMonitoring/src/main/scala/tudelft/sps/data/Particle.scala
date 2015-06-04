@@ -3,6 +3,6 @@ package tudelft.sps.data
 case class Particle(
   var x:Int,
   var y:Int,
-  var strideError:Double,
-  var compassError:Double
+  var compassError:Double,
+  var strideError:Double
 )
