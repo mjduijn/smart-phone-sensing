@@ -31,7 +31,8 @@ class FloorMap(
     var randomParticle = Particle(
       x = random.nextInt(width + 1),
       y = random.nextInt(height + 1),
-      compassError = (random.nextDouble() - 0.5) * 0.25,
+      compassError = random.nextGaussian() * 0.1,
+//      compassError = (random.nextDouble() - 0.5) * 0.25,
       strideError = (random.nextDouble() - 0.5) * 0.5
     )
 
@@ -39,8 +40,8 @@ class FloorMap(
       randomParticle = Particle(
         x = random.nextInt(width + 1),
         y = random.nextInt(height + 1),
-//        compassError = random.nextGaussian(),
-        compassError = (random.nextDouble() - 0.5) * 0.25,
+        compassError = random.nextGaussian() * 0.1,
+//        compassError = (random.nextDouble() - 0.5) * 0.25,
         strideError = (random.nextDouble() - 0.5) * 0.5
       )
     }
@@ -51,9 +52,9 @@ class FloorMap(
 
   /**
    *
-   * @param strideLength length of stride in mm
+   * @param distance length of stride in mm
    */
-  def move(strideLength: Int, angle: Float) = {
+  def move(distance: Int, angle: Double) = {
     var deadCount = 0
     var aliveCount = 0
     for (i <- current.indices) {
@@ -67,7 +68,7 @@ class FloorMap(
         compassAngle -= 2 * Math.PI
       }
 
-      val stride = strideLength + strideLength * current(i).strideError
+      val stride = distance + distance * current(i).strideError
       old(i).x = (current(i).x + stride * Math.cos(compassAngle)).toInt
       old(i).y = (current(i).y + stride * Math.sin(compassAngle)).toInt
 
