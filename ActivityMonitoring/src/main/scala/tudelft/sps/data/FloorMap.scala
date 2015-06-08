@@ -1,6 +1,19 @@
 package tudelft.sps.data
 
+import android.util.Log
+import org.json4s._
+import org.json4s.native.JsonMethods._
+import org.json4s.native.Serialization
+import org.json4s.native.Serialization.read
+
+import org.json._
+
+import scalaj.http._
+import java.io.{OutputStreamWriter, FileOutputStream, File}
+
+
 import scala.util.Random
+
 
 class FloorMap(
   val particleCount:Int,
@@ -16,9 +29,13 @@ class FloorMap(
 
   private val random = new Random()
 
+  val TAG = "FloorMap"
+
   private var current = particles1
   private var old = particles2
   def particles = current
+
+  var clusters = List[Cluster]()
 
   private def swap() =  {
     current = if(current.equals(particles1)) particles2 else particles1
@@ -31,7 +48,8 @@ class FloorMap(
     var randomParticle = Particle(
       x = random.nextInt(width + 1),
       y = random.nextInt(height + 1),
-      compassError = (random.nextDouble() - 0.5) * 0.25,
+//      compassError = (random.nextDouble() - 0.5) * 0.25,
+      compassError = random.nextGaussian() * 0.1,
       strideError = (random.nextDouble() - 0.5) * 0.5
     )
 
@@ -39,8 +57,8 @@ class FloorMap(
       randomParticle = Particle(
         x = random.nextInt(width + 1),
         y = random.nextInt(height + 1),
-//        compassError = random.nextGaussian(),
-        compassError = (random.nextDouble() - 0.5) * 0.25,
+//        compassError = (random.nextDouble() - 0.5) * 0.25,
+        compassError = random.nextGaussian() * 0.1,
         strideError = (random.nextDouble() - 0.5) * 0.5
       )
     }
@@ -105,6 +123,39 @@ class FloorMap(
     swap()
   }
 
+
+  def writeParticles(file: File): Unit = {
+//    try {
+//      val os = new OutputStreamWriter(new FileOutputStream(file))
+//      for (i <- current.indices) {
+//        val x = current(i).x
+//        val y = current(i).y
+//        os.write(s"$x $y\n")
+//      }
+//      os.close();
+//    }
+    sendParticles()
+  }
+
+  def sendParticles():Unit = {
+    println("Sending request!")
+    val url = "http://82.169.230.157:8000/"
+
+    val sb = new StringBuilder()
+    current.foreach(p => sb.append(p.x + " " + p.y + "\n")) //TODO do properly
+
+    val response = Http(url).postData(sb.toString()).header("content-type", "text/html").asString
+    try {
+
+      val jArray = new JSONArray(response.body)
+      for (i <- 0 until jArray.length()) {
+        val obj = jArray.getJSONObject(i)
+        val cluster = Cluster(obj.getInt("x"), obj.getInt("y"), obj.getInt("covarX"), obj.getInt("covarY"), obj.getDouble("weight"))
+      }
+    } catch {
+      case e => Log.d(TAG, "Exception while parsing json \n" + e)
+    }
+  }
 }
 
 object FloorMap{

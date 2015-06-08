@@ -1,10 +1,15 @@
 package tudelft.sps.monitoring
 
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+
 import android.app.Activity
 import android.content.Intent
 import android.graphics._
 import android.os.{PersistableBundle, Bundle}
 import android.preference.PreferenceManager
+import android.text.format.Time
 import android.util.Log
 import android.view.{Menu, WindowManager, View}
 import android.view.View.OnClickListener
@@ -104,6 +109,7 @@ class MotionModelActivity extends Activity
   var classifier:Classifier[KnnData, MotionState] = null
 
   override def onCreate(savedInstanceState: Bundle): Unit = {
+
     super.onCreate(savedInstanceState)
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     setContentView(R.layout.activity_motion_model)
@@ -128,6 +134,8 @@ class MotionModelActivity extends Activity
 
   override def onResume(): Unit = {
     super.onResume()
+
+    val floormap = FloorMap(10000)
 
     val prefs = PreferenceManager.getDefaultSharedPreferences(this)
 
@@ -221,12 +229,19 @@ class MotionModelActivity extends Activity
     val btnQueueing = findViewById(R.id.btn_queueing).asInstanceOf[Button]
     //Add onclick listeners
     val startStopObs= btnStartStop.onClick
-    .toggle()
-    .doOnEach(if(_){
-      btnStartStop.setText("Start")
-    } else {
-      btnStartStop.setText("Stop")
-    })
+      .observeOn(ExecutionContextScheduler(global))
+      .doOnEach(_ => {
+//        val now = new Time()
+//        now.setToNow()
+        val sdf = new SimpleDateFormat("yyyyMMdd_HHmmss")
+        floormap.writeParticles(new File(getExternalFilesDir(null), "particles_" + sdf.format(new Date())))
+      })
+//    .toggle()
+//    .doOnEach(if(_){
+//      btnStartStop.setText("Start")
+//    } else {
+//      btnStartStop.setText("Stop")
+//    })
 
 
     def train(obs:Observable[Boolean], table:String): Unit = obs
@@ -271,7 +286,6 @@ class MotionModelActivity extends Activity
         .subscribe(state => {
     })
 
-    val floormap = FloorMap(10000)
 
 
 
@@ -313,40 +327,61 @@ class MotionModelActivity extends Activity
 
     movementData
       .filter(_.state.equals(MotionState.Walking))
-      .doOnEach{ data =>
+      .doOnEach { data =>
         Log.d(TAG, "new movement data: " + movementData)
         var angle = data.compass + angleDiff
-        while(angle < -Math.PI) {
+        while (angle < -Math.PI) {
           angle += 2 * Math.PI
         }
-        while(angle > Math.PI) {
+        while (angle > Math.PI) {
           angle -= 2 * Math.PI
         }
         floormap.move(strideLength, angle.toFloat)
-
-        canvas.drawColor(Color.WHITE)
-        paint.setColor(Color.BLACK)
-        for (i <- lines.indices) {
-          canvas.drawLine(lines(i).x0 / 100, lines(i).y0 / 100, lines(i).x1 / 100, lines(i).y1 / 100, paint)
-        }
-
-        paint.setColor(Color.BLUE)
-        for(p <- floormap.particles){
-          canvas.drawPoint(p.x / 100, p.y / 100, paint)
-        }
-        paint.setColor(Color.RED)
-        for(d <- floormap.deadZones){
-          canvas.drawCircle(d._1 / 100, d._2 /100, 10, paint)
-        }
-        paint.setColor(Color.BLUE)
-        for(p <- floormap.particles) {
-          canvas.drawPoint(p.x / 100, p.y / 100, paint)
-        }
       }
-      .observeOn(UIThreadScheduler(this))
-      .subscribeRunning{ data =>
-        iv.invalidate()
-      }
+
+
+
+
+
+
+//    movementData
+//      .filter(_.state.equals(MotionState.Walking))
+//      .doOnEach{ data =>
+//        Log.d(TAG, "new movement data: " + movementData)
+//        var angle = data.compass + angleDiff
+//        while(angle < -Math.PI) {
+//          angle += 2 * Math.PI
+//        }
+//        while(angle > Math.PI) {
+//          angle -= 2 * Math.PI
+//        }
+//        floormap.move(strideLength, angle.toFloat)
+//
+//        canvas.drawColor(Color.WHITE)
+//        paint.setColor(Color.BLACK)
+//        for (i <- lines.indices) {
+//          canvas.drawLine(lines(i).x0 / 100, lines(i).y0 / 100, lines(i).x1 / 100, lines(i).y1 / 100, paint)
+//        }
+//
+//        paint.setColor(Color.BLUE)
+//        for(p <- floormap.particles){
+//          canvas.drawPoint(p.x / 100, p.y / 100, paint)
+//        }
+//        paint.setColor(Color.RED)
+//        for(d <- floormap.deadZones){
+//          canvas.drawCircle(d._1 / 100, d._2 /100, 10, paint)
+//        }
+//        paint.setColor(Color.BLUE)
+//        for(p <- floormap.particles) {
+//          canvas.drawPoint(p.x / 100, p.y / 100, paint)
+//        }
+//      }
+//      .observeOn(UIThreadScheduler(this))
+//      .subscribeRunning{ data =>
+//        iv.invalidate()
+//      }
+
+
 
     val btnSettings = findViewById(R.id.btn_settings).asInstanceOf[Button]
     btnSettings.onClick.subscribeRunning{ x =>
@@ -364,7 +399,6 @@ class MotionModelActivity extends Activity
       while(angle > Math.PI) {
         angle -= 2 * Math.PI
       }
-
 
       textCompass.setText("%.2f".format(angle))
     }
