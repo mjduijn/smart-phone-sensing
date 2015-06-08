@@ -26,7 +26,6 @@ class GetHandler(BaseHTTPRequestHandler):
         #Should not be doing GETS anyway
         self.send_response(404)
         self.end_headers()
-        self.wfile.write(message)
 
     def do_POST(self):
         """Respond to a POST request."""
@@ -34,12 +33,6 @@ class GetHandler(BaseHTTPRequestHandler):
         # Extract and print the contents of the POST
         length = int(self.headers['Content-Length'])
         print 'length: %d' % (length)
-        #post_data = urlparse.parse_qs(self.rfile.read(length).decode())
-
-        #print post_data
-        #for key, value in post_data.iteritems():
-        #    print "%s=%s" % (key, value)
-
 
         df = pandas.read_csv(StringIO(self.rfile.read(length)), sep=" ")
         classifier.fit(df) 
@@ -57,7 +50,7 @@ class GetHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-type", "application/json")
         self.end_headers()
-        self.wfile.write(json.dumps(components, sort_keys=True))
+        self.wfile.write(json.dumps(components))
 
 
 if __name__ == '__main__':
