@@ -251,11 +251,10 @@ class MotionModelActivity extends Activity
 
 
         for(cluster <- floormap.clusters) {
-          println(cluster)
-
-          paint.setColor(Color.GREEN)
-          paint.setAlpha((cluster.weight * 255).toInt)
-          canvas.drawCircle(cluster.x / 100, cluster.y / 100, 10, paint)
+//          println(cluster)
+//          paint.setColor(Color.GREEN)
+//          paint.setAlpha((cluster.weight * 255).toInt)
+//          canvas.drawCircle(cluster.x / 100, cluster.y / 100, 10, paint)
 
           val left = cluster.x - cluster.covarX / 2000
           val right = cluster.x + cluster.covarX / 2000
