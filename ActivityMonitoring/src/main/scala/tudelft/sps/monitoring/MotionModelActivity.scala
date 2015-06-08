@@ -327,7 +327,7 @@ class MotionModelActivity extends Activity
 
     movementData
       .filter(_.state.equals(MotionState.Walking))
-      .doOnEach { data =>
+      .foreach { data =>
         Log.d(TAG, "new movement data: " + movementData)
         var angle = data.compass + angleDiff
         while (angle < -Math.PI) {
@@ -339,14 +339,9 @@ class MotionModelActivity extends Activity
         floormap.move(strideLength, angle.toFloat)
       }
 
-
-
-
-
-
-//    movementData
-//      .filter(_.state.equals(MotionState.Walking))
-//      .doOnEach{ data =>
+      floormap.drawObs
+      .doOnEach{ data =>
+        println("New draw action")
 //        Log.d(TAG, "new movement data: " + movementData)
 //        var angle = data.compass + angleDiff
 //        while(angle < -Math.PI) {
@@ -356,30 +351,49 @@ class MotionModelActivity extends Activity
 //          angle -= 2 * Math.PI
 //        }
 //        floormap.move(strideLength, angle.toFloat)
-//
-//        canvas.drawColor(Color.WHITE)
-//        paint.setColor(Color.BLACK)
-//        for (i <- lines.indices) {
-//          canvas.drawLine(lines(i).x0 / 100, lines(i).y0 / 100, lines(i).x1 / 100, lines(i).y1 / 100, paint)
-//        }
-//
-//        paint.setColor(Color.BLUE)
-//        for(p <- floormap.particles){
-//          canvas.drawPoint(p.x / 100, p.y / 100, paint)
-//        }
-//        paint.setColor(Color.RED)
-//        for(d <- floormap.deadZones){
-//          canvas.drawCircle(d._1 / 100, d._2 /100, 10, paint)
-//        }
-//        paint.setColor(Color.BLUE)
-//        for(p <- floormap.particles) {
-//          canvas.drawPoint(p.x / 100, p.y / 100, paint)
-//        }
-//      }
-//      .observeOn(UIThreadScheduler(this))
-//      .subscribeRunning{ data =>
-//        iv.invalidate()
-//      }
+
+        canvas.drawColor(Color.WHITE)
+        paint.setColor(Color.BLACK)
+        for (i <- lines.indices) {
+          canvas.drawLine(lines(i).x0 / 100, lines(i).y0 / 100, lines(i).x1 / 100, lines(i).y1 / 100, paint)
+        }
+
+        paint.setColor(Color.BLUE)
+        for(p <- floormap.particles){
+          canvas.drawPoint(p.x / 100, p.y / 100, paint)
+        }
+        paint.setColor(Color.RED)
+        for(d <- floormap.deadZones){
+          canvas.drawCircle(d._1 / 100, d._2 /100, 10, paint)
+        }
+        paint.setColor(Color.BLUE)
+        for(p <- floormap.particles) {
+          canvas.drawPoint(p.x / 100, p.y / 100, paint)
+        }
+
+
+        for(cluster <- floormap.clusters) {
+          println(cluster)
+
+          paint.setColor(Color.GREEN)
+          paint.setAlpha((cluster.weight * 255).toInt)
+          canvas.drawCircle(cluster.x / 100, cluster.y / 100, 10, paint)
+
+          val left = cluster.x - cluster.covarX / 2000
+          val right = cluster.x + cluster.covarX / 2000
+          val top = cluster.y - cluster.covarY / 2000
+          val bottom = cluster.y + cluster.covarY / 2000
+          paint.setColor(Color.RED)
+          paint.setAlpha((cluster.weight * 255).toInt)
+          canvas.drawArc(left / 100, top / 100, right / 100, bottom / 100, 0, 360, true, paint)
+
+        }
+        paint.setAlpha(255)
+      }
+      .observeOn(UIThreadScheduler(this))
+      .subscribeRunning{ data =>
+        iv.invalidate()
+      }
 
 
 
