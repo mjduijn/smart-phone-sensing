@@ -230,18 +230,12 @@ class MotionModelActivity extends Activity
     //Add onclick listeners
     val startStopObs= btnStartStop.onClick
       .observeOn(ExecutionContextScheduler(global))
-      .doOnEach(_ => {
-//        val now = new Time()
-//        now.setToNow()
-        val sdf = new SimpleDateFormat("yyyyMMdd_HHmmss")
-        floormap.writeParticles(new File(getExternalFilesDir(null), "particles_" + sdf.format(new Date())))
-      })
-//    .toggle()
-//    .doOnEach(if(_){
-//      btnStartStop.setText("Start")
-//    } else {
-//      btnStartStop.setText("Stop")
-//    })
+    .toggle()
+    .doOnEach(if(_){
+      btnStartStop.setText("Start")
+    } else {
+      btnStartStop.setText("Stop")
+    })
 
 
     def train(obs:Observable[Boolean], table:String): Unit = obs

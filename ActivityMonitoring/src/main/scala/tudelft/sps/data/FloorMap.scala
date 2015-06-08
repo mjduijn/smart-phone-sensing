@@ -131,20 +131,6 @@ class FloorMap(
     sendParticles()
   }
 
-
-  def writeParticles(file: File): Unit = {
-//    try {
-//      val os = new OutputStreamWriter(new FileOutputStream(file))
-//      for (i <- current.indices) {
-//        val x = current(i).x
-//        val y = current(i).y
-//        os.write(s"$x $y\n")
-//      }
-//      os.close();
-//    }
-    sendParticles()
-  }
-
   def sendParticles():Unit = {
     println("Sending request!")
     val url = "http://mc.besuikerd.com:8000/"
