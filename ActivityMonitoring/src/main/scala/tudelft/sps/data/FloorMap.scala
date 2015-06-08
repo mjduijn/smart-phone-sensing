@@ -1,6 +1,25 @@
 package tudelft.sps.data
 
+import android.util.Log
+import org.json4s._
+import org.json4s.native.JsonMethods._
+import org.json4s.native.Serialization
+import org.json4s.native.Serialization.read
+
+import org.json._
+import rx.Subscriber
+import rx.lang.scala.Observable
+import rx.lang.scala.schedulers.ExecutionContextScheduler
+import rx.lang.scala.subjects.PublishSubject
+
+import scala.collection.mutable.ListBuffer
+import scala.concurrent.ExecutionContext.Implicits._
+import scalaj.http._
+import java.io.{IOException, OutputStreamWriter, FileOutputStream, File}
+
+
 import scala.util.Random
+
 
 class FloorMap(
   val particleCount:Int,
@@ -16,9 +35,15 @@ class FloorMap(
 
   private val random = new Random()
 
+  val TAG = "FloorMap"
+
   private var current = particles1
   private var old = particles2
   def particles = current
+
+  var clusters = List[Cluster]()
+  private val subj = PublishSubject[Int]
+  val drawObs:Observable[Int] = subj.subscribeOn((ExecutionContextScheduler(global))).onBackpressureDrop
 
   private def swap() =  {
     current = if(current.equals(particles1)) particles2 else particles1
@@ -31,8 +56,8 @@ class FloorMap(
     var randomParticle = Particle(
       x = random.nextInt(width + 1),
       y = random.nextInt(height + 1),
-      compassError = random.nextGaussian() * 0.1,
 //      compassError = (random.nextDouble() - 0.5) * 0.25,
+      compassError = random.nextGaussian() * 0.1,
       strideError = (random.nextDouble() - 0.5) * 0.5
     )
 
@@ -40,8 +65,8 @@ class FloorMap(
       randomParticle = Particle(
         x = random.nextInt(width + 1),
         y = random.nextInt(height + 1),
-        compassError = random.nextGaussian() * 0.1,
 //        compassError = (random.nextDouble() - 0.5) * 0.25,
+        compassError = random.nextGaussian() * 0.1,
         strideError = (random.nextDouble() - 0.5) * 0.5
       )
     }
@@ -102,10 +127,64 @@ class FloorMap(
         deadParticles(i).y = aliveParticles(randomPoint).y
       }
     }
-
     swap()
+    sendParticles()
   }
 
+  def sendParticles():Unit = {
+    println("Sending request!")
+    val url = "http://mc.besuikerd.com:8000/"
+
+    val sb = new StringBuilder()
+    current.foreach(p => sb.append(p.x + " " + p.y + "\n")) //TODO do properly
+
+    Observable[Unit](sub => {
+      try{
+        val response = Http(url).postData(sb.toString()).header("content-type", "text/html").asString
+        val jArray = new JSONArray(response.body)
+        val lb = ListBuffer[Cluster]()
+        for (i <- 0 until jArray.length()) {
+          val obj = jArray.getJSONObject(i)
+          val cluster = Cluster(obj.getInt("x"), obj.getInt("y"), obj.getInt("covarX"), obj.getInt("covarY"), obj.getDouble("weight"))
+          lb.append(cluster)
+        }
+        clusters = lb.sortBy(x => x.weight).toList
+        sub.onNext(())
+      } catch{
+        case e:IOException =>
+        case e:JSONException =>
+      }
+    }).subscribeOn(ExecutionContextScheduler(global))
+//      .just(Http(url).postData(sb.toString()).header("content-type", "text/html").asString)
+//      .doOnEach(response => {
+//        try {
+//          val jArray = new JSONArray(response.body)
+//          val lb = ListBuffer[Cluster]()
+//          for (i <- 0 until jArray.length()) {
+//            val obj = jArray.getJSONObject(i)
+//            val cluster = Cluster(obj.getInt("x"), obj.getInt("y"), obj.getInt("covarX"), obj.getInt("covarY"), obj.getDouble("weight"))
+//            lb.append(cluster)
+//          }
+//          clusters = lb.sortBy(x => x.weight).toList
+//        } catch {
+//          case e => Log.d(TAG, "Exception while parsing json \n" + e)(
+//        }
+//      })
+      .foreach(_ => subj.onNext(1))
+
+
+//    val response = Http(url).postData(sb.toString()).header("content-type", "text/html").asString
+//    try {
+//
+//      val jArray = new JSONArray(response.body)
+//      for (i <- 0 until jArray.length()) {
+//        val obj = jArray.getJSONObject(i)
+//        val cluster = Cluster(obj.getInt("x"), obj.getInt("y"), obj.getInt("covarX"), obj.getInt("covarY"), obj.getDouble("weight"))
+//      }
+//    } catch {
+//      case e => Log.d(TAG, "Exception while parsing json \n" + e)
+//    }
+  }
 }
 
 object FloorMap{
