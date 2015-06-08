@@ -16,8 +16,9 @@ import android.view.View.OnClickListener
 import android.widget.ImageView.ScaleType
 import android.widget.{ImageView, Button, TextView}
 import com.androidplot.xy.{BoundaryMode, LineAndPointFormatter, XYPlot, SimpleXYSeries}
+import tudelft.sps.data.MotionState.MotionState
 import tudelft.sps.statistics.{Classifier, Knn}
-import scala.collection.JavaConverters._
+import tudelft.sps.data.MotionState
 import scala.concurrent.duration._
 import rx.lang.scala.{Subscriber, Observable}
 import rx.lang.scala.schedulers.ExecutionContextScheduler
@@ -34,53 +35,16 @@ class MotionModelActivity extends Activity
   with ObservableAccelerometer
   with ManagedSubscriptions
   with ObservableCompass
+  with ObservableAutoCorrelation
+  with MotionModelDatabase
+  with ObservableMotionState
+  with QueueingTimes
 {
 
   val TAG = "MotionModelActivity"
 
-
   var plot:XYPlot = null
   var series:SimpleXYSeries = null
-
-  val tMin = 20
-  val tMax = 50
-
-  import MotionState.MotionState
-  object MotionState extends Enumeration{
-    type MotionState = Value
-    val Walking = Value("Walking")
-    val Queueing = Value("Queueing")
-  }
-
-  val autoCorrelation = accelerometer
-    .observeOn(ExecutionContextScheduler(global))
-    .map(_.magnitude)
-    .slidingBuffer(tMax * 2, 5)
-    .map{ sample =>
-      var t_i = tMin
-      var max: (Int, Double, Double) = (0, 0, 0)
-      while (t_i <= tMax) {
-        val m = tMax * 2 - 2 * t_i
-        val mean0 = SeqMath.mean(sample, m, m + t_i)
-        val mean1 = SeqMath.mean(sample, m + t_i, m + t_i * 2)
-
-        var k = 0
-        var sum:Double = 0
-        while(k < t_i){
-          sum = sum + (sample(m + k) - mean0) * (sample(m + k + t_i) - mean1)
-          k = k + 1
-        }
-        val stdev1 = SeqMath.stdev(sample, m + t_i, m + t_i * 2)
-        val chi = sum / (t_i * SeqMath.stdev(sample, m, m + t_i) * stdev1)
-        if(chi > max._2){
-          max = (t_i, chi, stdev1)
-        }
-        t_i = t_i + 1
-      }
-      max
-    }
-
-
 
   val stdevMagnitude = accelerometer
     .map(_.magnitude)
@@ -88,48 +52,16 @@ class MotionModelActivity extends Activity
     .map(SeqMath.stdev(_))
 
 
-  val walkTable = "WalkingAcceleration"
-  val queueTable = "QueueAcceleration"
-  val dbCreateQuery = Seq(
-      s"""
-          |CREATE TABLE $walkTable(
-          | stdev REAL,
-          | alpha REAL
-        |);
-        """.stripMargin,
-      s"""
-          |CREATE TABLE $queueTable(
-          | stdev REAL,
-          | alpha REAL
-          |);
-        """.stripMargin
-  )
-
-  var database:ObservableDBHelper = null
-  var classifier:Classifier[KnnData, MotionState] = null
-
   override def onCreate(savedInstanceState: Bundle): Unit = {
 
     super.onCreate(savedInstanceState)
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     setContentView(R.layout.activity_motion_model)
-    database = ObservableDBHelper(this, "MotionModel.db", 1, dbCreateQuery)
+
     plot = findViewById(R.id.plot).asInstanceOf[XYPlot]
     plot.setRangeBoundaries(0, 1, BoundaryMode.FIXED)
     series = new SimpleXYSeries("AutoCorrelation")
     plot.addSeries(series, new LineAndPointFormatter())
-
-
-    val mapping: CursorSelector => KnnData = c => KnnData(c.getDouble("stdev"), c.getDouble("alpha"))
-
-    val data = database.getReadableDatabase(){ db =>
-      val walks = db.mapped(mapping)(s"SELECT * FROM $walkTable", null)
-        .map((_, MotionState.Walking))
-      val queues = db.mapped(mapping)(s"SELECT * FROM $queueTable", null)
-        .map((_, MotionState.Queueing))
-      (KnnData.empty, MotionState.Queueing) :: (walks.merge(queues).toBlocking.toList)
-    }
-    classifier = Knn.traversableToKnn(data).toKnn(5, (a, b) => a.distance(b))
   }
 
   override def onResume(): Unit = {
@@ -139,43 +71,15 @@ class MotionModelActivity extends Activity
 
     val prefs = PreferenceManager.getDefaultSharedPreferences(this)
 
-//    autoCorrelation
-//      .slider(20)
-//      .observeOn(ExecutionContextScheduler(global))
-//      .subscribeRunning { seq =>
-//        series.setModel(seq.map(_._2.asInstanceOf[java.lang.Double]).asJava, SimpleXYSeries.ArrayFormat.Y_VALS_ONLY)
-//        plot.redraw()
-//      }
-
-
     val textStepInterval = findViewById(R.id.textStepInterval).asInstanceOf[TextView]
-
-
-    val tau = ((30, 1d, 0d) +: autoCorrelation)
-      .observeOn(ExecutionContextScheduler(global))
-      .filter(_._2 > 0.7)
-      .map(_._1)
-      .slider(20)
-      .map(x => SeqMath.alphaTrimmer(x.map(_.toDouble), 0.2))
-
     tau
       .observeOn(UIThreadScheduler(this))
       .subscribeRunning{x =>
         textStepInterval.setText("%.2f tau".format(x))
       }
 
-    val magnitudes =
-      accelerometer
-      .observeOn(ExecutionContextScheduler(global))
-      .map(_.magnitude)
-      .slidingBuffer(20, 5)
-
     val textStdevAcc = findViewById(R.id.textStdevAcc).asInstanceOf[TextView]
-    //    autoCorrelation
-    //      .observeOn(UIThreadScheduler(this))
-    //      .subscribeRunning{ x =>
-    //        textStdevAcc.setText("%.3f".format(x._3))
-    //      }
+
     magnitudes
       .map(SeqMath.stdev(_))
       .observeOn(UIThreadScheduler(this))
@@ -206,17 +110,6 @@ class MotionModelActivity extends Activity
         textSamplingRate.setText("%.1fHz".format(hertz))
       }
 
-    val motionState = magnitudes
-    .map{values =>
-      val stdev = values.stdev
-      val alpha = SeqMath.alphaTrimmer(values, 0.1)
-      classifier.classify(KnnData(stdev, alpha))
-    }
-    .slidingBuffer(3, 1)
-    .map{ x =>
-      if(x.count(_.equals(MotionState.Walking)) > 1) MotionState.Walking else MotionState.Queueing
-    }
-
     val textState = findViewById(R.id.textState).asInstanceOf[TextView]
     motionState
       .observeOn(UIThreadScheduler(this))
@@ -240,7 +133,7 @@ class MotionModelActivity extends Activity
 
     def train(obs:Observable[Boolean], table:String): Unit = obs
       .observeOn(ExecutionContextScheduler(global))
-      .doOnEach(if(_){database.getWritableDatabase().delete(table, null, null)})
+      .doOnEach(if(_){motionModelDatabase.getWritableDatabase().delete(table, null, null)})
       .combineLatestWith(magnitudes)((b, e) => (b, e))
       .filter(_._1)
       .map(_._2)
@@ -248,7 +141,7 @@ class MotionModelActivity extends Activity
       .subscribeRunning{ points =>
         val stdev = points.stdev
         val alpha = SeqMath.alphaTrimmer(points, 0.1)
-        database.getWritableDatabase(){ db =>
+        motionModelDatabase.getWritableDatabase(){ db =>
           db.insertRow(table,
             "stdev" -> stdev,
             "alpha" -> alpha
@@ -401,7 +294,18 @@ class MotionModelActivity extends Activity
 
       textCompass.setText("%.2f".format(angle))
     }
+
+    val btnQueueingTime = findViewById(R.id.btn_queueing_time).asInstanceOf[Button]
+    btnQueueingTime.onClick.subscribeRunning{ x =>
+      startQueueingMeasurement()
+    }
+
+    val textQueuingTime = findViewById(R.id.textQueueingTime).asInstanceOf[TextView]
+    queueingTime
+      .observeOn(UIThreadScheduler(this))
+      .subscribeRunning{x =>
+      textQueuingTime.setText(s"${x.average}(${x.stdev}})")
+    }
+
   }
-
-
 }

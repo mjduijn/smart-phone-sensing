@@ -14,4 +14,5 @@
     <string name="alphaTrimAcc">AlphaT Acc</string>
     <string name="avgAcc">Avg Acc</string>
     <string name="compass">Compass</string>
+    <string name="queueingTime">Queue Time Measurement</string>
 </resources>

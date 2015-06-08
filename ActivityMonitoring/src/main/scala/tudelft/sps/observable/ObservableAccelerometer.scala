@@ -5,12 +5,21 @@ import android.content.Context
 import android.hardware.{Sensor, SensorEvent, SensorEventListener, SensorManager}
 import android.os.Bundle
 import rx.lang.scala.Observable
+import rx.lang.scala.schedulers.ExecutionContextScheduler
 import rx.lang.scala.subjects.PublishSubject
+import tudelft.sps.data._
+
+import scala.concurrent.ExecutionContext.Implicits._
 
 trait ObservableAccelerometer extends Activity{
 
   private val sensorChangedSubject = PublishSubject[SensorEvent]()
   val accelerometer:Observable[SensorEvent] = sensorChangedSubject.onBackpressureDrop
+
+  val magnitudes = accelerometer
+    .observeOn(ExecutionContextScheduler(global))
+    .map(_.magnitude)
+    .slidingBuffer(20, 5)
 
   private var sensorManager:SensorManager = null
   private var accelerometerSensor:Sensor = null
