@@ -11,6 +11,15 @@
         android:key="strideLength"
         android:title="Stride Length"
         android:numeric="decimal"
-        android:defaultValue="600"
+        android:defaultValue="700"
     />
+
+    <EditTextPreference
+        android:key="redrawSpeed"
+        android:title="Redraw Speed"
+        android:numeric="integer"
+        android:defaultValue="500"
+        />
+
+
 </PreferenceScreen>

@@ -300,15 +300,14 @@ class MotionModelActivity extends Activity
 
     case class MovementData(compass:Double, state:MotionState, tau:Double)
 
-
-
     val angleDiff = prefs.getString("angleOffset", "0").toDouble
-    val strideLength = prefs.getString("strideLength", "600").toInt
+    val strideLength = prefs.getString("strideLength", "700").toInt
+    val redrawSpeed = prefs.getString("redrawSpeed", "500").toInt
     val movementData = compass
       .observeOn(ExecutionContextScheduler(global))
       .combineLatest(motionState)
       .combineLatest(tau)
-      .sample(200 millis)
+      .sample(redrawSpeed millis)
       .map(x => MovementData(x._1._1, x._1._2, x._2))
 
     movementData
@@ -322,7 +321,9 @@ class MotionModelActivity extends Activity
         while(angle > Math.PI) {
           angle -= 2 * Math.PI
         }
-        floormap.move(strideLength, angle.toFloat)
+
+        val distance = strideLength * (50 / data.tau) * redrawSpeed * 0.001
+        floormap.move(distance.toInt, angle)
 
         canvas.drawColor(Color.WHITE)
         paint.setColor(Color.BLACK)
