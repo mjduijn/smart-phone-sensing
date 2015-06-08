@@ -1,13 +1,6 @@
 package tudelft.sps.data
 
-import android.util.Log
-import org.json4s._
-import org.json4s.native.JsonMethods._
-import org.json4s.native.Serialization
-import org.json4s.native.Serialization.read
-
 import org.json._
-import rx.Subscriber
 import rx.lang.scala.Observable
 import rx.lang.scala.schedulers.ExecutionContextScheduler
 import rx.lang.scala.subjects.PublishSubject
