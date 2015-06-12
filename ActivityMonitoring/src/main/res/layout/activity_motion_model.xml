@@ -170,31 +170,31 @@
         </LinearLayout>
 
 
-        <com.androidplot.xy.XYPlot
-            android:id="@+id/plot"
-            android:layout_width="fill_parent"
-            android:layout_height="300dp"
-            android:layout_weight="1"
-            androidPlot.title="Graph"
-            androidPlot.domainLabel="Domain"
-            androidPlot.rangeLabel="Range"
-            androidPlot.titleWidget.labelPaint.textSize="@dimen/title_font_size"
-            androidPlot.domainLabelWidget.labelPaint.textSize="@dimen/domain_label_font_size"
-            androidPlot.rangeLabelWidget.labelPaint.textSize="@dimen/range_label_font_size"
-            androidPlot.graphWidget.marginTop="20dp"
-            androidPlot.graphWidget.marginLeft="15dp"
-            androidPlot.graphWidget.marginBottom="25dp"
-            androidPlot.graphWidget.marginRight="10dp"
-            androidPlot.graphWidget.rangeLabelPaint.textSize="@dimen/range_tick_label_font_size"
-            androidPlot.graphWidget.rangeOriginLabelPaint.textSize="@dimen/range_tick_label_font_size"
-            androidPlot.graphWidget.domainLabelPaint.textSize="@dimen/domain_tick_label_font_size"
-            androidPlot.graphWidget.domainOriginLabelPaint.textSize="@dimen/domain_tick_label_font_size"
-            androidPlot.legendWidget.textPaint.textSize="@dimen/legend_text_font_size"
-            androidPlot.legendWidget.iconSizeMetrics.heightMetric.value="15dp"
-            androidPlot.legendWidget.iconSizeMetrics.widthMetric.value="15dp"
-            androidPlot.legendWidget.heightMetric.value="25dp"
-            androidPlot.legendWidget.positionMetrics.anchor="right_bottom"
-            />
+        <!--<com.androidplot.xy.XYPlot-->
+            <!--android:id="@+id/plot"-->
+            <!--android:layout_width="fill_parent"-->
+            <!--android:layout_height="300dp"-->
+            <!--android:layout_weight="1"-->
+            <!--androidPlot.title="Graph"-->
+            <!--androidPlot.domainLabel="Domain"-->
+            <!--androidPlot.rangeLabel="Range"-->
+            <!--androidPlot.titleWidget.labelPaint.textSize="@dimen/title_font_size"-->
+            <!--androidPlot.domainLabelWidget.labelPaint.textSize="@dimen/domain_label_font_size"-->
+            <!--androidPlot.rangeLabelWidget.labelPaint.textSize="@dimen/range_label_font_size"-->
+            <!--androidPlot.graphWidget.marginTop="20dp"-->
+            <!--androidPlot.graphWidget.marginLeft="15dp"-->
+            <!--androidPlot.graphWidget.marginBottom="25dp"-->
+            <!--androidPlot.graphWidget.marginRight="10dp"-->
+            <!--androidPlot.graphWidget.rangeLabelPaint.textSize="@dimen/range_tick_label_font_size"-->
+            <!--androidPlot.graphWidget.rangeOriginLabelPaint.textSize="@dimen/range_tick_label_font_size"-->
+            <!--androidPlot.graphWidget.domainLabelPaint.textSize="@dimen/domain_tick_label_font_size"-->
+            <!--androidPlot.graphWidget.domainOriginLabelPaint.textSize="@dimen/domain_tick_label_font_size"-->
+            <!--androidPlot.legendWidget.textPaint.textSize="@dimen/legend_text_font_size"-->
+            <!--androidPlot.legendWidget.iconSizeMetrics.heightMetric.value="15dp"-->
+            <!--androidPlot.legendWidget.iconSizeMetrics.widthMetric.value="15dp"-->
+            <!--androidPlot.legendWidget.heightMetric.value="25dp"-->
+            <!--androidPlot.legendWidget.positionMetrics.anchor="right_bottom"-->
+            <!--/>-->
 
         <LinearLayout
             android:orientation="horizontal"
@@ -477,7 +477,7 @@
                     android:text=""/>
             </TableRow>
         </TableLayout>
-        <ImageView
+        <tudelft.sps.lib.widget.FloorMapView
             android:id="@+id/image_floor_plan"
             android:layout_width="match_parent"
             android:layout_height="500dp" />

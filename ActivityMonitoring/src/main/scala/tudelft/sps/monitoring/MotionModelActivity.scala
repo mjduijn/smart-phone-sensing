@@ -58,10 +58,10 @@ class MotionModelActivity extends Activity
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     setContentView(R.layout.activity_motion_model)
 
-    plot = findViewById(R.id.plot).asInstanceOf[XYPlot]
-    plot.setRangeBoundaries(0, 1, BoundaryMode.FIXED)
-    series = new SimpleXYSeries("AutoCorrelation")
-    plot.addSeries(series, new LineAndPointFormatter())
+//    plot = findViewById(R.id.plot).asInstanceOf[XYPlot]
+//    plot.setRangeBoundaries(0, 1, BoundaryMode.FIXED)
+//    series = new SimpleXYSeries("AutoCorrelation")
+//    plot.addSeries(series, new LineAndPointFormatter())
   }
 
   override def onResume(): Unit = {
