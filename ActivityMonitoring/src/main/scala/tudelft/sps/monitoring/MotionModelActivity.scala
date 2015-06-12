@@ -58,10 +58,10 @@ class MotionModelActivity extends Activity
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     setContentView(R.layout.activity_motion_model)
 
-    plot = findViewById(R.id.plot).asInstanceOf[XYPlot]
-    plot.setRangeBoundaries(0, 1, BoundaryMode.FIXED)
-    series = new SimpleXYSeries("AutoCorrelation")
-    plot.addSeries(series, new LineAndPointFormatter())
+//    plot = findViewById(R.id.plot).asInstanceOf[XYPlot]
+//    plot.setRangeBoundaries(0, 1, BoundaryMode.FIXED)
+//    series = new SimpleXYSeries("AutoCorrelation")
+//    plot.addSeries(series, new LineAndPointFormatter())
   }
 
   override def onResume(): Unit = {
@@ -298,6 +298,7 @@ class MotionModelActivity extends Activity
     val btnQueueingTime = findViewById(R.id.btn_queueing_time).asInstanceOf[Button]
     btnQueueingTime.onClick.subscribeRunning{ x =>
       startQueueingMeasurement()
+      btnQueueingTime.setText(R.string.resetQueueingTime)
     }
 
     val textQueuingTime = findViewById(R.id.textQueueingTime).asInstanceOf[TextView]
@@ -305,6 +306,7 @@ class MotionModelActivity extends Activity
       .observeOn(UIThreadScheduler(this))
       .subscribeRunning{x =>
       textQueuingTime.setText(s"${x.average}(${x.stdev}})")
+      btnQueueing.setText(R.string.queueingTime)
     }
 
   }

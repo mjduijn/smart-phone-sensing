@@ -133,7 +133,7 @@ class FloorMap(
 
     Observable[Unit](sub => {
       try{
-        val response = Http(url).postData(sb.toString()).header("content-type", "text/html").asString
+        val response = Http(url).timeout(500, 2000).postData(sb.toString()).header("content-type", "text/html").asString
         val jArray = new JSONArray(response.body)
         val lb = ListBuffer[Cluster]()
         for (i <- 0 until jArray.length()) {
@@ -142,12 +142,12 @@ class FloorMap(
           lb.append(cluster)
         }
         clusters = lb.sortBy(x => x.weight).toList
-        sub.onNext(())
-      } catch{
-        case e:IOException =>
-        case e:JSONException =>
+      } catch {
+        case e: IOException =>
+        case e: JSONException =>
       }
-    }).subscribeOn(ExecutionContextScheduler(global))
+      sub.onNext(())
+      }).subscribeOn(ExecutionContextScheduler(global))
 //      .just(Http(url).postData(sb.toString()).header("content-type", "text/html").asString)
 //      .doOnEach(response => {
 //        try {

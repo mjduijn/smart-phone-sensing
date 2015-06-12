@@ -3,7 +3,7 @@
     <EditTextPreference
         android:key="angleOffset"
         android:title="Angle Offset"
-        android:numeric="decimal"
+        android:inputType="numberSigned|numberDecimal"
         android:defaultValue="0.0"
     />
 
