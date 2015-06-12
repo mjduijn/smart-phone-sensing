@@ -17,6 +17,7 @@ import android.widget.ImageView.ScaleType
 import android.widget.{ImageView, Button, TextView}
 import com.androidplot.xy.{BoundaryMode, LineAndPointFormatter, XYPlot, SimpleXYSeries}
 import tudelft.sps.data.MotionState.MotionState
+import tudelft.sps.lib.widget.FloorMapView
 import tudelft.sps.statistics.{Classifier, Knn}
 import tudelft.sps.data.MotionState
 import scala.concurrent.duration._
@@ -173,31 +174,8 @@ class MotionModelActivity extends Activity
         .subscribe(state => {
     })
 
-
-
-
-    val b  = Bitmap.createBitmap(720, 143, Bitmap.Config.ARGB_8888)
-//    val b = Bitmap.createBitmap(b0, 0, 0, 143, 720, matrix, true)
-    val canvas = new Canvas(b)
-    val iv = this.findViewById(R.id.image_floor_plan).asInstanceOf[ImageView]
-
-    iv.setImageBitmap(b)
-
-    val matrix = new Matrix()
-    iv.setScaleType(ScaleType.MATRIX)   //required
-    matrix.postScale(1.75.toFloat, 4)
-    matrix.postRotate(90, 720/2, 720/2)
-
-//    matrix.postRotate(90, 720/2, 720/2)
-//    matrix.postScale(4, 1)
-
-    iv.setImageMatrix(matrix)
-
-    val lines = floormap.walls
-    val paint = new Paint()
-
-//    var angle:Float = 0.0f
-
+    val iv = this.findViewById(R.id.image_floor_plan).asInstanceOf[FloorMapView]
+    iv.floorMap = floormap
 
     case class MovementData(compass:Double, state:MotionState, tau:Double)
 
@@ -227,53 +205,10 @@ class MotionModelActivity extends Activity
       }
 
       floormap.drawObs
-      .doOnEach{ data =>
-        println("New draw action")
-
-        canvas.drawColor(Color.WHITE)
-        paint.setColor(Color.BLACK)
-        for (i <- lines.indices) {
-          canvas.drawLine(lines(i).x0 / 100, lines(i).y0 / 100, lines(i).x1 / 100, lines(i).y1 / 100, paint)
-        }
-
-        paint.setColor(Color.BLUE)
-        for(p <- floormap.particles){
-          canvas.drawPoint(p.x / 100, p.y / 100, paint)
-        }
-        paint.setColor(Color.RED)
-        for(d <- floormap.deadZones){
-          canvas.drawCircle(d._1 / 100, d._2 /100, 10, paint)
-        }
-        paint.setColor(Color.BLUE)
-        for(p <- floormap.particles) {
-          canvas.drawPoint(p.x / 100, p.y / 100, paint)
-        }
-
-        //Draw clusters
-        for(i <- floormap.clusters.indices) {
-          if(i == 1) {
-            paint.setColor(Color.RED)
-          }
-          else {
-            paint.setColor(Color.GRAY)
-          }
-          val cluster = floormap.clusters(i)
-          val left = cluster.x - cluster.covarX / 2000
-          val right = cluster.x + cluster.covarX / 2000
-          val top = cluster.y - cluster.covarY / 2000
-          val bottom = cluster.y + cluster.covarY / 2000
-
-          paint.setAlpha((cluster.weight * 255).toInt)
-          canvas.drawArc(left / 100, top / 100, right / 100, bottom / 100, 0, 360, true, paint)
-        }
-        paint.setAlpha(255)
+      .observeOn(ExecutionContextScheduler(global))
+      .subscribeRunning{ _ =>
+        iv.redraw()
       }
-      .observeOn(UIThreadScheduler(this))
-      .subscribeRunning{ data =>
-        iv.invalidate()
-      }
-
-
 
     val btnSettings = findViewById(R.id.btn_settings).asInstanceOf[Button]
     btnSettings.onClick.subscribeRunning{ x =>
