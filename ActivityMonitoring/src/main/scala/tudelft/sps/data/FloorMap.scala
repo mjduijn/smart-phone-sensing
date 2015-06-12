@@ -197,12 +197,12 @@ object FloorMap{
   def create9th(): Array[Line] = {
     val result = scala.collection.mutable.MutableList[Line]()
 
-    //Room 1
+    //Room 1 Dijkstrazaal
     result += mkline(0.0, 0, 0, 6.1)
     result += mkline(0.0, 8, 0, 0)
     result += mkline(8.0, 8, 0, 6.1)
 
-    //Room 2
+    //Room 2 Chill room
     result += mkline(12.0, 12, 0, 6.1)
     result += mkline(12.0, 16, 0, 0)
     result += mkline(16.0, 16.0, 0, 6.1)
@@ -211,11 +211,18 @@ object FloorMap{
     result += mkline(16.0, 20, 0, 0)
     result += mkline(20.0, 20, 0, 6.1)
 
-    //Room 4
-    //    result += mkline(12.0, 12, 11.3, 14.3)
-    result += mkline(12.0, 12, 8.2, 14.3)
+    //Room 4 Coffee!
+////        result += mkline(12.0, 12, 11.3, 14.3)
+//    result += mkline(12.0, 12, 8.2, 14.3)
+//    result += mkline(12.0, 16, 14.3, 14.3)
+////        result += mkline(16.0, 16, 11.3, 14.3)
+//    result += mkline(16.0, 16, 8.2, 14.3)
+
+    //Room 4 Coffee!
+    result += mkline(14.0, 14, 8.2, 11.3)
+    result += mkline(12.0, 14, 11.3, 11.3)
+    result += mkline(12.0, 12, 11.3, 14.3)
     result += mkline(12.0, 16, 14.3, 14.3)
-    //    result += mkline(16.0, 16, 11.3, 14.3)
     result += mkline(16.0, 16, 8.2, 14.3)
 
     //Room 5
