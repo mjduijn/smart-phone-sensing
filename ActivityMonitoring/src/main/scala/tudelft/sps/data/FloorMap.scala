@@ -149,7 +149,7 @@ class FloorMap(
           val cluster = Cluster(obj.getInt("x"), obj.getInt("y"), obj.getInt("covarX"), obj.getInt("covarY"), obj.getDouble("weight"))
           lb.append(cluster)
         }
-        clusters = lb.sortBy(x => x.weight).toList
+        clusters = lb.sortBy(-_.weight).toList
       } catch {
         case e: IOException =>
         case e: JSONException =>
@@ -242,7 +242,7 @@ object FloorMap{
     result += mkline(0, 0, 6.1, 8.1) //Vertical
     result += mkline(72, 72, 6.1, 8.1)
 
-    result += mkline(0.0, 12.0, 8.2, 8.2) //Lower
+    result += mkline(0.0, 14.0, 8.2, 8.2) //Lower
     result += mkline(16.0, 56.0, 8.2, 8.2)
     result += mkline(64.0, 72.0, 8.2, 8.2)
 

@@ -47,18 +47,20 @@ class FloorMapView(ctx:Context, attrs:AttributeSet, defStyleAttr:Int) extends Im
       canvas.drawPoint(p.x / 100, p.y / 100, paint)
     }
 
-
-    for(cluster <- floorMap.clusters) {
-      //          println(cluster)
-      //          paint.setColor(Color.GREEN)
-      //          paint.setAlpha((cluster.weight * 255).toInt)
-      //          canvas.drawCircle(cluster.x / 100, cluster.y / 100, 10, paint)
-
+    //Draw clusters
+    for(i <- floorMap.clusters.indices) {
+      if(i == 1) {
+        paint.setColor(Color.RED)
+      }
+      else {
+        paint.setColor(Color.GRAY)
+      }
+      val cluster = floorMap.clusters(i)
       val left = cluster.x - cluster.covarX / 2000
       val right = cluster.x + cluster.covarX / 2000
       val top = cluster.y - cluster.covarY / 2000
       val bottom = cluster.y + cluster.covarY / 2000
-      paint.setColor(Color.RED)
+
       paint.setAlpha((cluster.weight * 255).toInt)
       canvas.drawArc(left / 100, top / 100, right / 100, bottom / 100, 0, 360, true, paint)
     }
