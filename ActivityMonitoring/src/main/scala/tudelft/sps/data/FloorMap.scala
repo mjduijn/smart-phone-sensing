@@ -113,7 +113,15 @@ class FloorMap(
         aliveCount += 1
       }
     }
-    if(aliveCount > 0){
+    //if over 2/3 of particles died, sample "conservatively", choose a locations among all particles
+    if(aliveCount <= deadCount * 2) {
+      for(i <- 0 until deadCount){
+        val randomPoint = random.nextInt(particleCount)
+        deadParticles(i).x = current(randomPoint).x
+        deadParticles(i).y = current(randomPoint).y
+      }
+    }
+    else if(aliveCount > 0){
       for(i <- 0 until deadCount){
         val randomPoint = random.nextInt(aliveCount)
         deadParticles(i).x = aliveParticles(randomPoint).x
@@ -210,13 +218,6 @@ object FloorMap{
     //Room 3
     result += mkline(16.0, 20, 0, 0)
     result += mkline(20.0, 20, 0, 6.1)
-
-    //Room 4 Coffee!
-////        result += mkline(12.0, 12, 11.3, 14.3)
-//    result += mkline(12.0, 12, 8.2, 14.3)
-//    result += mkline(12.0, 16, 14.3, 14.3)
-////        result += mkline(16.0, 16, 11.3, 14.3)
-//    result += mkline(16.0, 16, 8.2, 14.3)
 
     //Room 4 Coffee!
     result += mkline(14.0, 14, 8.2, 11.3)
