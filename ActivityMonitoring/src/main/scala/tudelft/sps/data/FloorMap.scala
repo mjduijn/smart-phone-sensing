@@ -1,5 +1,6 @@
 package tudelft.sps.data
 
+import android.util.Log
 import org.json._
 import rx.lang.scala.Observable
 import rx.lang.scala.schedulers.ExecutionContextScheduler
@@ -109,19 +110,21 @@ class FloorMap(
         deadParticles(deadCount) = old(i)
         deadCount += 1
       } else {
-        aliveParticles(aliveCount) = current(i)
+        aliveParticles(aliveCount) = old(i)
         aliveCount += 1
       }
     }
-    //if over 2/3 of particles died, sample "conservatively", choose a locations among all particles
-    if(aliveCount <= deadCount * 2) {
+//    if over 2/3 of particles died, sample "conservatively", choose a locations among all particles
+    Log.d(TAG, "" + (deadCount.toDouble / particleCount))
+    if(deadCount.toDouble / particleCount > 0.75) {
+//      Log.d(TAG, "More than 90% dead particles")
       for(i <- 0 until deadCount){
         val randomPoint = random.nextInt(particleCount)
         deadParticles(i).x = current(randomPoint).x
         deadParticles(i).y = current(randomPoint).y
       }
-    }
-    else if(aliveCount > 0){
+    }else
+    if(aliveCount > 0){
       for(i <- 0 until deadCount){
         val randomPoint = random.nextInt(aliveCount)
         deadParticles(i).x = aliveParticles(randomPoint).x
@@ -252,10 +255,17 @@ object FloorMap{
   }
 
   val deadZones = Array[(Int, Int)](
-    (10000, 2000),
-    (70000, 3000),
-    (6000, 10000),
-    (25000, 10000),
-    (70000, 10000)
+//    (10000, 2000),
+//    (70000, 3000),
+//    (6000, 10000),
+//    (25000, 10000),
+//    (70000, 10000)
+
+    (10000, -1000),
+    (82000, -1000),
+    (-1000, 9000),
+    (-1000, 16000),
+    (25000, 16000),
+    (82000, 16000)
   )
 }

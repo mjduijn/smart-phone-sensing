@@ -53,7 +53,7 @@ class FloorMapView(ctx:Context, attrs:AttributeSet, defStyleAttr:Int) extends Im
 
     //Draw clusters
     for(i <- floorMap.clusters.indices) {
-      if(i == 1) {
+      if(i == 0) {
         paint.setColor(Color.RED)
       }
       else {
