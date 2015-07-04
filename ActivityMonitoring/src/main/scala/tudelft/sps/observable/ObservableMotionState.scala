@@ -19,10 +19,16 @@ trait ObservableMotionState extends Activity{
   private var _motionStateClassifier: Classifier[KnnData, MotionState] = null
   def motionStateClassifier = _motionStateClassifier
 
+
+  private var maxStdev: Double = 1
+  private var minStdev: Double = 0
+  private var maxAvg: Double = 1
+  private var minAvg: Double = 0
+
   val motionState = magnitudes
     .map{values =>
-    val stdev = values.stdev
-    val alpha = SeqMath.alphaTrimmer(values, 0.1)
+    val stdev = (values.stdev - minStdev) / (maxStdev - minStdev)
+    val alpha = (SeqMath.alphaTrimmer(values, 0.1) - minAvg) / (maxAvg - minAvg)
     motionStateClassifier.classify(KnnData(stdev, alpha))
     }
     .slidingBuffer(3, 1)
@@ -41,6 +47,16 @@ trait ObservableMotionState extends Activity{
         .map((_, MotionState.Queueing))
       (KnnData.empty, MotionState.Queueing) :: (walks.merge(queues).toBlocking.toList)
     }
+
+    maxStdev = data.maxBy(_._1.stdev)._1.stdev
+    minStdev = data.minBy(_._1.stdev)._1.stdev
+    maxAvg = data.maxBy(_._1.avg)._1.avg
+    minAvg = data.minBy(_._1.avg)._1.avg
+
+    data.map{case (data, state) =>
+      KnnData((data.stdev - minStdev) / (maxStdev - minStdev), (data.avg - minAvg) / (maxAvg - minAvg))
+    }
+
     _motionStateClassifier = Knn.traversableToKnn(data).toKnn(5, (a, b) => a.distance(b))
   }
 }
