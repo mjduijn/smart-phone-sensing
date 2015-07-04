@@ -8,6 +8,7 @@ import rx.lang.scala.Observable
 import rx.lang.scala.schedulers.ExecutionContextScheduler
 import rx.lang.scala.subjects.PublishSubject
 import tudelft.sps.data._
+import tudelft.sps.statistics.SeqExtensions._
 
 import scala.concurrent.ExecutionContext.Implicits._
 
@@ -15,6 +16,13 @@ trait ObservableAccelerometer extends Activity{
 
   private val sensorChangedSubject = PublishSubject[SensorEvent]()
   val accelerometer:Observable[SensorEvent] = sensorChangedSubject.onBackpressureDrop
+
+  val accelerometerFrequency:Observable[Double] = accelerometer
+    .map(_ => System.currentTimeMillis())
+    .zipWithPrevious
+    .map(t => t._2 - t._1)
+    .slider(25, 25)
+    .map(1000 / _.mean)
 
   val magnitudes = accelerometer
     .observeOn(ExecutionContextScheduler(global))

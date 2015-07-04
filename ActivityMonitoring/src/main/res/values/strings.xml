@@ -16,4 +16,5 @@
     <string name="compass">Compass</string>
     <string name="queueingTime">Queue Time</string>
     <string name="measuring">Measuring</string>
+    <string name="strideLength">Stride Length</string>
 </resources>

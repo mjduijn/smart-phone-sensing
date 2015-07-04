@@ -76,9 +76,10 @@ class MotionModelActivity extends Activity
 
     val textStepInterval = findViewById(R.id.textStepInterval).asInstanceOf[TextView]
     tau
+      .combineLatest(accelerometerFrequency)
       .observeOn(UIThreadScheduler(this))
-      .subscribeRunning{x =>
-        textStepInterval.setText("%.2f tau".format(x))
+      .subscribeRunning{ tuple =>
+        textStepInterval.setText("%.2f seconds".format(tuple._1 / tuple._2))
       }
 
     val textStdevAcc = findViewById(R.id.textStdevAcc).asInstanceOf[TextView]
@@ -101,16 +102,10 @@ class MotionModelActivity extends Activity
       .subscribe(x => textAlphaTrimmerAcc.setText("%.3f".format(x)))
 
     val textSamplingRate = findViewById(R.id.textSamplingRate).asInstanceOf[TextView]
-    accelerometer
-      .observeOn(ExecutionContextScheduler(global))
-      .map(_ => System.currentTimeMillis())
-      .zipWithPrevious
-      .map(t => (t._2 - t._1))
-      .slidingBuffer(25, 25)
+    accelerometerFrequency
       .observeOn(UIThreadScheduler(this))
-      .subscribeRunning{ diff =>
-        val hertz = 1000 / diff.mean
-        textSamplingRate.setText("%.1fHz".format(hertz))
+      .subscribeRunning{ hz =>
+        textSamplingRate.setText("%.1fHz".format(hz))
       }
 
     val textState = findViewById(R.id.textState).asInstanceOf[TextView]
