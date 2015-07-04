@@ -21,5 +21,12 @@
         android:defaultValue="500"
         />
 
+    <EditTextPreference
+        android:key="compassError"
+        android:title="Compass Error"
+        android:inputType="numberSigned|numberDecimal"
+        android:defaultValue="0.1"
+        />
+
 
 </PreferenceScreen>

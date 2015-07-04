@@ -20,7 +20,8 @@ class FloorMap(
   val width: Int,
   val height: Int,
   val walls:Array[Line],
-  val deadZones:Array[(Int, Int)]
+  val deadZones:Array[(Int, Int)],
+  val compassError:Double
 ){
   private val particles1 = new Array[Particle](particleCount)
   private val particles2 = new Array[Particle](particleCount)
@@ -51,7 +52,7 @@ class FloorMap(
       x = random.nextInt(height + 1),
       y = random.nextInt(width + 1),
 //      compassError = (random.nextDouble() - 0.5) * 0.25,
-      compassError = random.nextGaussian() * 0.1,
+      compassError = random.nextGaussian() * compassError,
       strideError = (random.nextDouble() - 0.5) * 0.5
     )
 
@@ -198,7 +199,7 @@ object FloorMap{
   val standardWidth = 72000
   val standardHeight = 14300
 
-  def apply(particleCount:Int):FloorMap = new FloorMap(particleCount, standardWidth, standardHeight, create9th(), deadZones)
+  def apply(particleCount:Int, compassError:Double):FloorMap = new FloorMap(particleCount, standardWidth, standardHeight, create9th(), deadZones, compassError)
 
   def toCo(c: Double):Int = (c * scaling).toInt
 
