@@ -48,8 +48,8 @@ class FloorMap(
 
 
     var randomParticle = Particle(
-      x = random.nextInt(width + 1),
-      y = random.nextInt(height + 1),
+      x = random.nextInt(height + 1),
+      y = random.nextInt(width + 1),
 //      compassError = (random.nextDouble() - 0.5) * 0.25,
       compassError = random.nextGaussian() * 0.1,
       strideError = (random.nextDouble() - 0.5) * 0.5
@@ -57,8 +57,8 @@ class FloorMap(
 
     while(deadZones.exists{case (x,y) => !walls.exists(wall => wall.doLinesIntersect(x, randomParticle.x, y, randomParticle.y))}){
       randomParticle = Particle(
-        x = random.nextInt(width + 1),
-        y = random.nextInt(height + 1),
+        x = random.nextInt(height + 1),
+        y = random.nextInt(width + 1),
 //        compassError = (random.nextDouble() - 0.5) * 0.25,
         compassError = random.nextGaussian() * 0.1,
         strideError = (random.nextDouble() - 0.5) * 0.5
@@ -209,63 +209,53 @@ object FloorMap{
     val result = scala.collection.mutable.MutableList[Line]()
 
     //Room 1 Dijkstrazaal
-    result += mkline(0.0, 0, 0, 6.1)
-    result += mkline(0.0, 8, 0, 0)
-    result += mkline(8.0, 8, 0, 6.1)
+    result += mkline(8.2, 14.3, 0, 0)
+    result += mkline(14.3, 14.3, 0, 8)
+    result += mkline(8.2, 14.3, 8, 8)
 
     //Room 2 Chill room
-    result += mkline(12.0, 12, 0, 6.1)
-    result += mkline(12.0, 16, 0, 0)
-    result += mkline(16.0, 16.0, 0, 6.1)
+    result += mkline(8.2, 14.3, 12, 12)
+    result += mkline(14.3, 14.3, 12, 16)
+    result += mkline(8.2, 14.3, 16, 16)
 
     //Room 3
-    result += mkline(16.0, 20, 0, 0)
-    result += mkline(20.0, 20, 0, 6.1)
+    result += mkline(14.3, 14.3, 16, 20)
+    result += mkline(8.2, 14.3, 20, 20)
 
     //Room 4 Coffee!
-    result += mkline(14.0, 14, 8.2, 11.3)
-    result += mkline(12.0, 14, 11.3, 11.3)
-    result += mkline(12.0, 12, 11.3, 14.3)
-    result += mkline(12.0, 16, 14.3, 14.3)
-    result += mkline(16.0, 16, 8.2, 14.3)
+    result += mkline(3, 6.1, 14, 14)
+    result += mkline(3, 3, 12, 14)
+    result += mkline(0, 3, 12, 12)
+    result += mkline(0, 0, 12, 16)
+    result += mkline(0, 6.1, 16, 16)
 
-    //Room 5
-    result += mkline(56.0, 56.0, 8.2, 14.3)
-    result += mkline(56.0, 60.0, 14.3, 14.3)
-    result += mkline(60.0, 60.0, 8.2, 14.3)
-
-    //Room 6
-    result += mkline(60.0, 64.0, 14.3, 14.3)
-    result += mkline(64.0, 64.0, 8.2, 14.3)
+    //Room 5 + 6
+    result += mkline(0, 6.1, 56, 56)
+    result += mkline(0, 0, 56, 64)
+    result += mkline(0, 6.1, 60, 60)
+    result += mkline(0, 6.1, 64, 64)
 
     //Central hallway
-    result += mkline(8.0, 12.0, 6.1, 6.1) //Upper
-    result += mkline(20.0, 72.0, 6.1, 6.1)
+    result += mkline(8.2, 8.2, 8, 12) //Upper
+    result += mkline(8.2, 8.2, 20, 72)
 
-    result += mkline(0, 0, 6.1, 8.1) //Vertical
-    result += mkline(72, 72, 6.1, 8.1)
+    result += mkline(6.1, 8.2, 0, 0) //Vertical
+    result += mkline(6.1, 8.2, 72, 72)
 
-    result += mkline(0.0, 14.0, 8.2, 8.2) //Lower
-    result += mkline(16.0, 56.0, 8.2, 8.2)
-    result += mkline(64.0, 72.0, 8.2, 8.2)
-
-    //TODO elevator??
+    result += mkline(6.1, 6.1, 0, 14) //Lower
+    result += mkline(6.1, 6.1, 16, 56)
+    result += mkline(6.1, 6.1, 64, 72)
 
     return result.toArray
   }
 
   val deadZones = Array[(Int, Int)](
-//    (10000, 2000),
-//    (70000, 3000),
-//    (6000, 10000),
-//    (25000, 10000),
-//    (70000, 10000)
+    (-1000, -1000), //Top left (2)
+    (4000, -1000),
+    (-1000, 30000), //middle left
+    (-1000, 75000), //bottom left
 
-    (10000, -1000),
-    (82000, -1000),
-    (-1000, 9000),
-    (-1000, 16000),
-    (25000, 16000),
-    (82000, 16000)
+    (15000, 10000), //top right
+    (15000, 75000) //bottom right
   )
 }

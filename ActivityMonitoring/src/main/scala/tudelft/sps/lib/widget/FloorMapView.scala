@@ -38,17 +38,16 @@ class FloorMapView(ctx:Context, attrs:AttributeSet, defStyleAttr:Int) extends Im
     canvas.drawColor(Color.WHITE)
     paint.setColor(Color.BLACK)
     for (i <- lines.indices) {
-//      canvas.drawLine(lines(i).x0 / 100, lines(i).y0 / 100, lines(i).x1 / 100, lines(i).y1 / 100, paint)
-      canvas.drawLine(lines(i).y0 / 100, lines(i).x0 / 100, lines(i).y1 / 100, lines(i).x1 / 100, paint)
+      canvas.drawLine(lines(i).x0 / 100, lines(i).y0 / 100, lines(i).x1 / 100, lines(i).y1 / 100, paint)
     }
 
     paint.setColor(Color.BLUE)
     for(p <- floorMap.particles){
-      canvas.drawPoint(p.y / 100, p.x / 100, paint)
+      canvas.drawPoint(p.x / 100, p.y / 100, paint)
     }
     paint.setColor(Color.BLUE)
     for(p <- floorMap.particles) {
-      canvas.drawPoint(p.y / 100, p.x / 100, paint)
+      canvas.drawPoint(p.x / 100, p.y / 100, paint)
     }
 
     //Draw clusters
@@ -66,8 +65,7 @@ class FloorMapView(ctx:Context, attrs:AttributeSet, defStyleAttr:Int) extends Im
       val bottom = cluster.y + cluster.covarY / 2000
 
       paint.setAlpha((cluster.weight * 255).toInt)
-      canvas.drawOval(bottom / 100, left / 100, top / 100, right / 100, paint)
-//      canvas.drawArc(left / 100, top / 100, right / 100, bottom / 100, 0, 360, true, paint)
+      canvas.drawOval(left / 100, top / 100, right / 100, bottom / 100, paint)
     }
     paint.setAlpha(255)
     postInvalidate()
