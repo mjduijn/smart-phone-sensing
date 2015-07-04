@@ -231,18 +231,17 @@ class MotionModelActivity extends Activity
     }
 
     val btnQueueingTime = findViewById(R.id.btn_queueing_time).asInstanceOf[Button]
+    val textQueuingTime = findViewById(R.id.textQueueingTime).asInstanceOf[TextView]
     btnQueueingTime.onClick.subscribeRunning{ x =>
+      textQueuingTime.setText(getString(R.string.measuring) + "...")
       startQueueingMeasurement()
-      btnQueueingTime.setText(R.string.resetQueueingTime)
     }
 
-    val textQueuingTime = findViewById(R.id.textQueueingTime).asInstanceOf[TextView]
     queueingTime
       .observeOn(UIThreadScheduler(this))
       .subscribeRunning{x =>
-      textQueuingTime.setText(s"${x.average}(${x.stdev}})")
-      btnQueueing.setText(R.string.queueingTime)
-    }
-
+        textQueuingTime.setText("avg=%.1fms\nstdev=%.1fms".format(x.average, x.stdev))
+        btnQueueing.setText(R.string.queueingTime)
+      }
   }
 }

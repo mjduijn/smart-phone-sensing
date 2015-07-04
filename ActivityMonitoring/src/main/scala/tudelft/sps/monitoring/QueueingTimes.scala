@@ -6,11 +6,9 @@ import rx.lang.scala.{Subscription, Observable, Subject}
 import rx.lang.scala.subjects.PublishSubject
 import tudelft.sps.data.{MotionState, KnnData}
 import tudelft.sps.observable.{ManagedSubscriptions, ObservableMotionState}
-import tudelft.sps.statistics.SeqExtensions
-import tudelft.sps.statistics.Classifier
 import tudelft.sps.statistics.SeqExtensions.{StatisticalSeqExtensions, SeqMath}
 
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.{ListBuffer, ArrayBuffer}
 
 trait QueueingTimes extends Activity {
   this: Activity
@@ -34,14 +32,15 @@ trait QueueingTimes extends Activity {
 
     queueingSubscription = motionState.subscribe{ _ match {
       case MotionState.Queueing => {
-        episodes += System.currentTimeMillis()
         if(System.currentTimeMillis() - time > threshold){
           queueingTimeSubject.onNext(QueueTimeData(System.currentTimeMillis() - episodes.head, episodes.toList))
           queueingSubscription.unsubscribe()
+        } else{
+          episodes += System.currentTimeMillis()
+          time = System.currentTimeMillis()
         }
-        time = System.currentTimeMillis()
       }
-      case MotionState.Walking => {
+      case MotionState.Walking if episodes.nonEmpty => {
         episodes += System.currentTimeMillis()
         time = System.currentTimeMillis()
       }

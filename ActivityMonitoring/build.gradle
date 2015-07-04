@@ -32,6 +32,20 @@ android {
         multiDexEnabled true
     }
 
+    sourceSets {
+        main {
+            scala {
+                srcDir "src/main/scala"
+            }
+        }
+
+        androidTest {
+            scala {
+                srcDir "src/test/scala"
+            }
+        }
+    }
+
     productFlavors {
         dev {
             minSdkVersion 21 // To reduce compilation time
