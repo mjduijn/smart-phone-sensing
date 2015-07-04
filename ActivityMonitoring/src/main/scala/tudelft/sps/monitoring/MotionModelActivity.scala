@@ -82,6 +82,15 @@ class MotionModelActivity extends Activity
         textStepInterval.setText("%.2f seconds".format(tuple._1 / tuple._2))
       }
 
+
+    val textStrideLength = findViewById(R.id.textStrideLength).asInstanceOf[TextView]
+    floormap.strideLengthObservable
+      .observeOn(UIThreadScheduler(this))
+      .subscribeRunning{ stride =>
+      textStrideLength.setText("%.1f meter".format(stride))
+    }
+
+
     val textStdevAcc = findViewById(R.id.textStdevAcc).asInstanceOf[TextView]
 
     magnitudes
@@ -112,8 +121,6 @@ class MotionModelActivity extends Activity
     motionState
       .observeOn(UIThreadScheduler(this))
       .subscribeRunning(x => textState.setText(x.toString))
-
-
 
     def train(obs:Observable[Boolean], table:String): Unit = obs
       .observeOn(ExecutionContextScheduler(global))

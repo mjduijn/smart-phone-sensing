@@ -2,15 +2,18 @@ package tudelft.sps.data
 
 import android.util.Log
 import org.json._
-import rx.lang.scala.Observable
+import rx.lang.scala.{Subject, Observable}
 import rx.lang.scala.schedulers.ExecutionContextScheduler
 import rx.lang.scala.subjects.PublishSubject
+import tudelft.sps.statistics.SeqExtensions.SeqMath
+import tudelft.sps.statistics.SeqExtensions.SeqMath._
 
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.concurrent.ExecutionContext.Implicits._
 import scalaj.http._
 import java.io.{IOException, OutputStreamWriter, FileOutputStream, File}
-
+import tudelft.sps.observable.ObservableExtensions
+import tudelft.sps.statistics.SeqExtensions.SeqMath._
 
 import scala.util.Random
 
@@ -27,6 +30,13 @@ class FloorMap(
   private val particles2 = new Array[Particle](particleCount)
   private val deadParticles = new Array[Particle](particleCount)
   private val aliveParticles = new Array[Particle](particleCount)
+
+  private val strideLengthSubject = PublishSubject[Double]()
+  val strideLengthObservable: Observable[Double] = strideLengthSubject
+
+  val initialStrideLength = .65d
+  val maximumBufferSize = 60
+  private val strideLengths = ListBuffer(initialStrideLength)
 
   private val random = new Random()
 
@@ -53,7 +63,7 @@ class FloorMap(
       y = random.nextInt(width + 1),
 //      compassError = (random.nextDouble() - 0.5) * 0.25,
       compassError = random.nextGaussian() * compassError,
-      strideError = (random.nextDouble() - 0.5) * 0.5
+      strideError = (random.nextDouble() - 0.5)
     )
 
     while(deadZones.exists{case (x,y) => !walls.exists(wall => wall.doLinesIntersect(x, randomParticle.x, y, randomParticle.y))}){
@@ -77,6 +87,12 @@ class FloorMap(
   def move(distance: Int, angle: Double) = {
     var deadCount = 0
     var aliveCount = 0
+
+    val stride = SeqMath.alphaTrimmer(strideLengths, .1f)
+
+
+    val aliveStrides = ArrayBuffer[Double]()
+
     for (i <- current.indices) {
       //TODO paper says compass error should be Gaussian
 
@@ -88,9 +104,13 @@ class FloorMap(
         compassAngle -= 2 * Math.PI
       }
 
-      val stride = distance + distance * current(i).strideError
-      old(i).x = (current(i).x + stride * Math.cos(compassAngle)).toInt
-      old(i).y = (current(i).y + stride * Math.sin(compassAngle)).toInt
+      val particleStride = if(strideLengths.size < 10) initialStrideLength else stride + stride * current(i).strideError
+
+      //val stride = distance + distance * current(i).strideError
+
+
+      old(i).x = (current(i).x + particleStride * Math.cos(compassAngle)).toInt
+      old(i).y = (current(i).y + particleStride * Math.sin(compassAngle)).toInt
 
       var dead = false
 //      for(wall <- walls) {
@@ -112,6 +132,7 @@ class FloorMap(
         deadCount += 1
       } else {
         aliveParticles(aliveCount) = old(i)
+        aliveStrides += particleStride
         aliveCount += 1
       }
     }
@@ -132,6 +153,16 @@ class FloorMap(
         deadParticles(i).y = aliveParticles(randomPoint).y
       }
     }
+
+    val averageStride = SeqMath.mean(aliveStrides)
+
+    strideLengthSubject.onNext(averageStride)
+
+    this.strideLengths += averageStride
+    if(strideLengths.size > maximumBufferSize){
+      strideLengths.remove(0)
+    }
+
     swap()
     sendParticles()
   }
