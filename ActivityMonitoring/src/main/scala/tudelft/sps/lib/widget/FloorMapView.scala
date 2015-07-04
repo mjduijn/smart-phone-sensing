@@ -23,12 +23,11 @@ class FloorMapView(ctx:Context, attrs:AttributeSet, defStyleAttr:Int) extends Im
   private val paint = new Paint()
   private val bitmap = Bitmap.createBitmap(143, 720, Bitmap.Config.ARGB_8888)
   private val canvas = new Canvas(bitmap)
+
   setImageBitmap(bitmap)
 
-  setScaleType(ScaleType.FIT_XY)
-
   if(isInEditMode){
-    floorMap = FloorMap.apply(1000)
+    floorMap = FloorMap.apply(1000, .1d)
     floorMap.clusters = List(Cluster(FloorMap.standardWidth / 2, FloorMap.standardHeight / 2, 1000000, 10000000, 1))
     redraw()
   }
@@ -67,7 +66,6 @@ class FloorMapView(ctx:Context, attrs:AttributeSet, defStyleAttr:Int) extends Im
 
       paint.setAlpha((cluster.weight * 255).toInt)
       canvas.drawOval(bottom / 100, left / 100, top / 100, right / 100, paint)
-//      canvas.drawArc(left / 100, top / 100, right / 100, bottom / 100, 0, 360, true, paint)
     }
     paint.setAlpha(255)
     postInvalidate()

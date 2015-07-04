@@ -23,14 +23,14 @@
                 android:layout_height="fill_parent" >
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/samplingRate"
                     android:id="@+id/labelSamplingRate"
                     android:layout_weight="1" />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/textSamplingRate"
                     android:layout_weight="1" />
@@ -43,14 +43,14 @@
                 >
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/state"
                     android:id="@+id/labelState"
                     android:layout_weight="1" />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/textState"
                     android:layout_weight="1" />
@@ -62,14 +62,14 @@
                 android:layout_height="fill_parent" >
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/compass"
                     android:id="@+id/labelCompass"
                     android:layout_weight="1" />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/textCompass"
                     android:layout_weight="1" />
@@ -81,14 +81,14 @@
                 android:layout_height="fill_parent" >
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/stepInterval"
                     android:id="@+id/labelStepInterval"
                     android:layout_weight="1" />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/textStepInterval"
                     android:layout_weight="1" />
@@ -100,14 +100,14 @@
                 android:layout_height="fill_parent" >
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/stdevAcc"
                     android:id="@+id/labelStdevAcc"
                     android:layout_weight="1" />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/textStdevAcc"
                     android:layout_weight="1" />
@@ -118,14 +118,14 @@
                 android:layout_height="fill_parent" >
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/avgAcc"
                     android:id="@+id/labelAvgAcc"
                     android:layout_weight="1" />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/textAvgAcc"
                     android:layout_weight="1" />
@@ -136,14 +136,14 @@
                 android:layout_height="fill_parent" >
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/alphaTrimAcc"
                     android:id="@+id/labelAlphaTrimAcc"
                     android:layout_weight="1" />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/textAlphaTrimAcc"
                     android:layout_weight="1" />
@@ -154,18 +154,17 @@
                 android:layout_height="fill_parent" >
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/queueingTime"
                     android:id="@+id/labelQueueingTime"
                     android:layout_weight="1" />
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/textQueueingTime"
                     android:layout_weight="1" />
-
             </LinearLayout>
         </LinearLayout>
 
@@ -222,261 +221,255 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content" >
 
-            <Button
-                android:id="@+id/btn_start_stop"
-                android:text="Start"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_weight="1"/>
-            <Button
-                android:id="@+id/btn_walking"
-                android:text="Walking"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_weight="1" />
-            <Button
-                android:id="@+id/btn_queueing"
-                android:text="Queueing"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_weight="1" />
+            <!--<Button-->
+                <!--android:id="@+id/btn_start_stop"-->
+                <!--android:text="Start"-->
+                <!--android:layout_width="0dp"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_gravity="center_horizontal"-->
+                <!--android:layout_weight="1"/>-->
+            <!--<Button-->
+                <!--android:id="@+id/btn_walking"-->
+                <!--android:text="Walking"-->
+                <!--android:layout_width="0dp"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_gravity="center_horizontal"-->
+                <!--android:layout_weight="1" />-->
+            <!--<Button-->
+                <!--android:id="@+id/btn_queueing"-->
+                <!--android:text="Queueing"-->
+                <!--android:layout_width="0dp"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_gravity="center_horizontal"-->
+                <!--android:layout_weight="1" />-->
             <Button
                 android:id="@+id/btn_settings"
                 android:text="Settings"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_weight="1" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <Button
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/queueingTime"
+                />
+
+            <Button
                 android:id="@+id/btn_queueing_time"
-            />
+                android:text="@string/queueingTime"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                />
         </LinearLayout>
-        <TableLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <TableRow
-                android:id="@+id/table_row_1"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                android:gravity="center_horizontal">
+        <!--<TableLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content">-->
+            <!--<TableRow-->
+                <!--android:id="@+id/table_row_1"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:gravity="center_horizontal">-->
 
-                <TextView
-                    android:background="@layout/cell_shape"
-                    android:padding="5dp"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text=""/>
-                <TextView
-                    android:background="@layout/cell_shape"
-                    android:padding="5dp"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="Walking"/>
-                <TextView
-                    android:background="@layout/cell_shape"
-                    android:padding="5dp"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="Queueing"/>
-            </TableRow>
-            <!-- True positive row -->
-            <TableRow
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                android:gravity="center_horizontal">
+                <!--<TextView-->
+                    <!--android:background="@layout/cell_shape"-->
+                    <!--android:padding="5dp"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text=""/>-->
+                <!--<TextView-->
+                    <!--android:background="@layout/cell_shape"-->
+                    <!--android:padding="5dp"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="Walking"/>-->
+                <!--<TextView-->
+                    <!--android:background="@layout/cell_shape"-->
+                    <!--android:padding="5dp"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="Queueing"/>-->
+            <!--</TableRow>-->
+            <!--&lt;!&ndash; True positive row &ndash;&gt;-->
+            <!--<TableRow-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:gravity="center_horizontal">-->
 
-                <TextView
-                    android:background="@layout/cell_shape"
-                    android:padding="5dp"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="True +ive"/>
-                <TextView
-                    android:id="@+id/true_pos_walk"
-                    android:background="@layout/cell_shape"
-                    android:padding="5dp"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text=""/>
-                <TextView
-                    android:id="@+id/true_pos_queue"
-                    android:background="@layout/cell_shape"
-                    android:padding="5dp"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text=""/>
-            </TableRow>
-            <!-- False positive row -->
-            <TableRow
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                android:gravity="center_horizontal">
+                <!--<TextView-->
+                    <!--android:background="@layout/cell_shape"-->
+                    <!--android:padding="5dp"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="True +ive"/>-->
+                <!--<TextView-->
+                    <!--android:id="@+id/true_pos_walk"-->
+                    <!--android:background="@layout/cell_shape"-->
+                    <!--android:padding="5dp"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text=""/>-->
+                <!--<TextView-->
+                    <!--android:id="@+id/true_pos_queue"-->
+                    <!--android:background="@layout/cell_shape"-->
+                    <!--android:padding="5dp"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text=""/>-->
+            <!--</TableRow>-->
+            <!--&lt;!&ndash; False positive row &ndash;&gt;-->
+            <!--<TableRow-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:gravity="center_horizontal">-->
 
-                <TextView
-                    android:background="@layout/cell_shape"
-                    android:padding="5dp"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="False +ive"/>
-                <TextView
-                    android:id="@+id/false_pos_walk"
-                    android:background="@layout/cell_shape"
-                    android:padding="5dp"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text=""/>
-                <TextView
-                    android:id="@+id/false_pos_queue"
-                    android:background="@layout/cell_shape"
-                    android:padding="5dp"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text=""/>
-            </TableRow>
-            <!-- False negative row -->
-            <TableRow
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                android:gravity="center_horizontal">
+                <!--<TextView-->
+                    <!--android:background="@layout/cell_shape"-->
+                    <!--android:padding="5dp"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="False +ive"/>-->
+                <!--<TextView-->
+                    <!--android:id="@+id/false_pos_walk"-->
+                    <!--android:background="@layout/cell_shape"-->
+                    <!--android:padding="5dp"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text=""/>-->
+                <!--<TextView-->
+                    <!--android:id="@+id/false_pos_queue"-->
+                    <!--android:background="@layout/cell_shape"-->
+                    <!--android:padding="5dp"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text=""/>-->
+            <!--</TableRow>-->
+            <!--&lt;!&ndash; False negative row &ndash;&gt;-->
+            <!--<TableRow-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:gravity="center_horizontal">-->
 
-                <TextView
-                    android:background="@layout/cell_shape"
-                    android:padding="5dp"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="False -ive"/>
-                <TextView
-                    android:id="@+id/false_neg_walk"
-                    android:background="@layout/cell_shape"
-                    android:padding="5dp"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text=""/>
-                <TextView
-                    android:id="@+id/false_neg_queue"
-                    android:background="@layout/cell_shape"
-                    android:padding="5dp"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text=""/>
-            </TableRow>
-            <!-- True negative row -->
-            <TableRow
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                android:gravity="center_horizontal">
+                <!--<TextView-->
+                    <!--android:background="@layout/cell_shape"-->
+                    <!--android:padding="5dp"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="False -ive"/>-->
+                <!--<TextView-->
+                    <!--android:id="@+id/false_neg_walk"-->
+                    <!--android:background="@layout/cell_shape"-->
+                    <!--android:padding="5dp"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text=""/>-->
+                <!--<TextView-->
+                    <!--android:id="@+id/false_neg_queue"-->
+                    <!--android:background="@layout/cell_shape"-->
+                    <!--android:padding="5dp"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text=""/>-->
+            <!--</TableRow>-->
+            <!--&lt;!&ndash; True negative row &ndash;&gt;-->
+            <!--<TableRow-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:gravity="center_horizontal">-->
 
-                <TextView
-                    android:background="@layout/cell_shape"
-                    android:padding="5dp"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="True -ive"/>
-                <TextView
-                    android:id="@+id/true_neg_walk"
-                    android:background="@layout/cell_shape"
-                    android:padding="5dp"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text=""/>
-                <TextView
-                    android:id="@+id/true_neg_queue"
-                    android:background="@layout/cell_shape"
-                    android:padding="5dp"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text=""/>
-            </TableRow>
-            <!-- Time measured row -->
-            <TableRow
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                android:gravity="center_horizontal">
+                <!--<TextView-->
+                    <!--android:background="@layout/cell_shape"-->
+                    <!--android:padding="5dp"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="True -ive"/>-->
+                <!--<TextView-->
+                    <!--android:id="@+id/true_neg_walk"-->
+                    <!--android:background="@layout/cell_shape"-->
+                    <!--android:padding="5dp"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text=""/>-->
+                <!--<TextView-->
+                    <!--android:id="@+id/true_neg_queue"-->
+                    <!--android:background="@layout/cell_shape"-->
+                    <!--android:padding="5dp"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text=""/>-->
+            <!--</TableRow>-->
+            <!--&lt;!&ndash; Time measured row &ndash;&gt;-->
+            <!--<TableRow-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:gravity="center_horizontal">-->
 
-                <TextView
-                    android:background="@layout/cell_shape"
-                    android:padding="5dp"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="Time meas."/>
-                <TextView
-                    android:id="@+id/time_meas_walk"
-                    android:background="@layout/cell_shape"
-                    android:padding="5dp"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text=""/>
-                <TextView
-                    android:id="@+id/time_meas_queue"
-                    android:background="@layout/cell_shape"
-                    android:padding="5dp"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text=""/>
-            </TableRow>
-            <!-- Time calculated row -->
-            <TableRow
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                android:gravity="center_horizontal">
+                <!--<TextView-->
+                    <!--android:background="@layout/cell_shape"-->
+                    <!--android:padding="5dp"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="Time meas."/>-->
+                <!--<TextView-->
+                    <!--android:id="@+id/time_meas_walk"-->
+                    <!--android:background="@layout/cell_shape"-->
+                    <!--android:padding="5dp"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text=""/>-->
+                <!--<TextView-->
+                    <!--android:id="@+id/time_meas_queue"-->
+                    <!--android:background="@layout/cell_shape"-->
+                    <!--android:padding="5dp"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text=""/>-->
+            <!--</TableRow>-->
+            <!--&lt;!&ndash; Time calculated row &ndash;&gt;-->
+            <!--<TableRow-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:gravity="center_horizontal">-->
 
-                <TextView
-                    android:background="@layout/cell_shape"
-                    android:padding="5dp"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="Time calc"/>
-                <TextView
-                    android:id="@+id/time_calc_walk"
-                    android:background="@layout/cell_shape"
-                    android:padding="5dp"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text=""/>
-                <TextView
-                    android:id="@+id/time_calc_queue"
-                    android:background="@layout/cell_shape"
-                    android:padding="5dp"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text=""/>
-            </TableRow>
-        </TableLayout>
+                <!--<TextView-->
+                    <!--android:background="@layout/cell_shape"-->
+                    <!--android:padding="5dp"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="Time calc"/>-->
+                <!--<TextView-->
+                    <!--android:id="@+id/time_calc_walk"-->
+                    <!--android:background="@layout/cell_shape"-->
+                    <!--android:padding="5dp"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text=""/>-->
+                <!--<TextView-->
+                    <!--android:id="@+id/time_calc_queue"-->
+                    <!--android:background="@layout/cell_shape"-->
+                    <!--android:padding="5dp"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text=""/>-->
+            <!--</TableRow>-->
+        <!--</TableLayout>-->
         <tudelft.sps.lib.widget.FloorMapView
             android:id="@+id/image_floor_plan"
             android:layout_width="match_parent"
