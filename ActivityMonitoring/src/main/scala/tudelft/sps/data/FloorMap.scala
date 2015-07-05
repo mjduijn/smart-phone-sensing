@@ -104,7 +104,11 @@ class FloorMap(
         compassAngle -= 2 * Math.PI
       }
 
-      val particleStride = if(strideLengths.size < 10) initialStrideLength else stride + stride * current(i).strideError
+      val particleStride =
+        if(strideLengths.size < 10)
+          initialStrideLength + initialStrideLength * current(i).strideError //Initial strides should have stride error as well
+        else
+          stride + stride * current(i).strideError
 
       //val stride = distance + distance * current(i).strideError
 
