@@ -53,11 +53,11 @@ trait ObservableMotionState extends Activity{
     maxAvg = data.maxBy(_._1.avg)._1.avg
     minAvg = data.minBy(_._1.avg)._1.avg
 
-    data.map{case (data, state) =>
-      KnnData((data.stdev - minStdev) / (maxStdev - minStdev), (data.avg - minAvg) / (maxAvg - minAvg))
+    val normalized_data = data.map{case (data, state) =>
+      (KnnData((data.stdev - minStdev) / (maxStdev - minStdev), (data.avg - minAvg) / (maxAvg - minAvg)), state) 
     }
 
-    _motionStateClassifier = Knn.traversableToKnn(data).toKnn(5, (a, b) => a.distance(b))
+    _motionStateClassifier = Knn.traversableToKnn(normalized_data).toKnn(5, (a, b) => a.distance(b))
   }
 }
 
