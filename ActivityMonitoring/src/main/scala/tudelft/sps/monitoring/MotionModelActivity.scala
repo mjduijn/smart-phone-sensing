@@ -68,15 +68,18 @@ class MotionModelActivity extends Activity
   override def onResume(): Unit = {
     super.onResume()
 
-    val floormap = FloorMap(10000)
-
     val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+    val compassError = prefs.getString("compassError", ".1f").toDouble
+
+
+    val floormap = FloorMap(10000, compassError)
 
     val textStepInterval = findViewById(R.id.textStepInterval).asInstanceOf[TextView]
     tau
+      .combineLatest(accelerometerFrequency)
       .observeOn(UIThreadScheduler(this))
-      .subscribeRunning{x =>
-        textStepInterval.setText("%.2f tau".format(x))
+      .subscribeRunning{ tuple =>
+        textStepInterval.setText("%.2f seconds".format(tuple._1 / tuple._2))
       }
 
     val textStdevAcc = findViewById(R.id.textStdevAcc).asInstanceOf[TextView]
@@ -99,16 +102,10 @@ class MotionModelActivity extends Activity
       .subscribe(x => textAlphaTrimmerAcc.setText("%.3f".format(x)))
 
     val textSamplingRate = findViewById(R.id.textSamplingRate).asInstanceOf[TextView]
-    accelerometer
-      .observeOn(ExecutionContextScheduler(global))
-      .map(_ => System.currentTimeMillis())
-      .zipWithPrevious
-      .map(t => (t._2 - t._1))
-      .slidingBuffer(25, 25)
+    accelerometerFrequency
       .observeOn(UIThreadScheduler(this))
-      .subscribeRunning{ diff =>
-        val hertz = 1000 / diff.mean
-        textSamplingRate.setText("%.1fHz".format(hertz))
+      .subscribeRunning{ hz =>
+        textSamplingRate.setText("%.1fHz".format(hz))
       }
 
     val textState = findViewById(R.id.textState).asInstanceOf[TextView]
@@ -116,20 +113,6 @@ class MotionModelActivity extends Activity
       .observeOn(UIThreadScheduler(this))
       .subscribeRunning(x => textState.setText(x.toString))
 
-
-    /////Learned metrics part
-    val btnStartStop = findViewById(R.id.btn_start_stop).asInstanceOf[Button]
-    val btnWalking = findViewById(R.id.btn_walking).asInstanceOf[Button]
-    val btnQueueing = findViewById(R.id.btn_queueing).asInstanceOf[Button]
-    //Add onclick listeners
-    val startStopObs= btnStartStop.onClick
-      .observeOn(ExecutionContextScheduler(global))
-    .toggle()
-    .doOnEach(if(_){
-      btnStartStop.setText("Start")
-    } else {
-      btnStartStop.setText("Stop")
-    })
 
 
     def train(obs:Observable[Boolean], table:String): Unit = obs
@@ -154,25 +137,6 @@ class MotionModelActivity extends Activity
     train(btnTrainWalking.onClick.toggle(false, true).doOnEach(b => btnTrainWalking.setText(if(b) "Stop Training" else "Train Walking")), walkTable)
     val btnTrainQueueing = findViewById(R.id.btn_train_queueing).asInstanceOf[Button]
     train(btnTrainQueueing.onClick.toggle(false, true).doOnEach(b => btnTrainQueueing.setText(if(b) "Stop Training" else "Train Queueing")), queueTable)
-
-    val walkingObs = Observable((aSubscriber: Subscriber[String]) => {
-      btnWalking.setOnClickListener(new OnClickListener {
-        override def onClick(p1: View): Unit = if(!aSubscriber.isUnsubscribed) aSubscriber.onNext("Walking")
-      })
-    })
-    val queueingObs = Observable((aSubscriber: Subscriber[String]) => {
-      btnQueueing.setOnClickListener(new OnClickListener {
-        override def onClick(p1: View): Unit = if(!aSubscriber.isUnsubscribed) aSubscriber.onNext("Queueing")
-      })
-    })
-
-    //TODO calculate times and stuff
-    var testingTimer = System.currentTimeMillis()
-    startStopObs
-      .merge(walkingObs)
-        .merge(queueingObs)
-        .subscribe(state => {
-    })
 
     val iv = this.findViewById(R.id.image_floor_plan).asInstanceOf[FloorMapView]
     iv.floorMap = floormap
@@ -241,7 +205,6 @@ class MotionModelActivity extends Activity
       .observeOn(UIThreadScheduler(this))
       .subscribeRunning{x =>
         textQueuingTime.setText("avg=%.1fms\nstdev=%.1fms".format(x.average, x.stdev))
-        btnQueueing.setText(R.string.queueingTime)
       }
   }
 }
