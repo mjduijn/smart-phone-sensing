@@ -29,6 +29,7 @@ import tudelft.sps.observable._
 import tudelft.sps.data._
 import tudelft.sps.observable.ViewObservable._
 import tudelft.sps.lib.db._
+import tudelft.sps.lib.util.Timer
 
 import scala.concurrent.ExecutionContext.Implicits._
 
@@ -72,7 +73,7 @@ class MotionModelActivity extends Activity
     val compassError = prefs.getString("compassError", ".1f").toDouble
 
 
-    val floormap = FloorMap(10000, compassError)
+    val floormap = FloorMap(6000, compassError)
 
     val textStepInterval = findViewById(R.id.textStepInterval).asInstanceOf[TextView]
     tau
@@ -173,7 +174,9 @@ class MotionModelActivity extends Activity
           angle -= 2 * Math.PI
         }
         val distance = strideLength * (50 / data.tau) * redrawSpeed * 0.001
-        floormap.move(distance.toInt, angle)
+        val executionTime = Timer.timed{floormap.move(distance.toInt, angle)}
+
+        Log.d(TAG, s"move took ${executionTime}ms")
       }
 
       floormap.drawObs
