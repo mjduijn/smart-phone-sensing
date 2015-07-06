@@ -173,8 +173,7 @@ class MotionModelActivity extends Activity
         while (angle > Math.PI) {
           angle -= 2 * Math.PI
         }
-        val distance = strideLength * (50 / data.tau) * redrawSpeed * 0.001
-        val executionTime = Timer.timed{floormap.move(distance.toInt, angle)}
+        val executionTime = Timer.timed{floormap.move(data.tau, redrawSpeed, angle)}
 
         Log.d(TAG, s"move took ${executionTime}ms")
       }

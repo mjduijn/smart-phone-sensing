@@ -5,6 +5,7 @@ import org.json._
 import rx.lang.scala.{Subject, Observable}
 import rx.lang.scala.schedulers.ExecutionContextScheduler
 import rx.lang.scala.subjects.PublishSubject
+import tudelft.sps.data
 import tudelft.sps.statistics.SeqExtensions.SeqMath
 import tudelft.sps.statistics.SeqExtensions.SeqMath._
 
@@ -84,7 +85,7 @@ class FloorMap(
    *
    * @param distance length of stride in mm
    */
-  def move(distance: Int, angle: Double) = {
+  def move(tau:Double, redrawSpeed:Int, angle: Double) = {
 
     Log.d(TAG, "Moving..." + strideLengths.mkString("[", ", ", "]"))
     var deadCount = 0
@@ -94,6 +95,9 @@ class FloorMap(
 
 
     val aliveStrides = ArrayBuffer[Double]()
+
+
+    val strideMultiplier =  (50 / tau) * redrawSpeed * 0.001
 
     for (i <- current.indices) {
       //TODO paper says compass error should be Gaussian
@@ -115,8 +119,10 @@ class FloorMap(
       //val stride = distance + distance * current(i).strideError
 
 
-      old(i).x = (current(i).x + particleStride * 1000 /*mm*/ * Math.cos(compassAngle)).toInt
-      old(i).y = (current(i).y + particleStride * 1000 /*mm*/ * Math.sin(compassAngle)).toInt
+      val actualStride = particleStride * strideMultiplier
+
+      old(i).x = (current(i).x + actualStride * 1000 /*mm*/ * Math.cos(compassAngle)).toInt
+      old(i).y = (current(i).y + actualStride * 1000 /*mm*/ * Math.sin(compassAngle)).toInt
 
       var dead = false
 //      for(wall <- walls) {
