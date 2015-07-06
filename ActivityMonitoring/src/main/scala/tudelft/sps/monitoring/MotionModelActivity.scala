@@ -87,7 +87,7 @@ class MotionModelActivity extends Activity
     floormap.strideLengthObservable
       .observeOn(UIThreadScheduler(this))
       .subscribeRunning{ stride =>
-      textStrideLength.setText("%.1f meter".format(stride))
+      textStrideLength.setText("%.2f meter".format(stride))
     }
 
 

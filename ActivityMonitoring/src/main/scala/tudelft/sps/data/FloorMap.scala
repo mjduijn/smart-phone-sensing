@@ -85,6 +85,8 @@ class FloorMap(
    * @param distance length of stride in mm
    */
   def move(distance: Int, angle: Double) = {
+
+    Log.d(TAG, "Moving..." + strideLengths.mkString("[", ", ", "]"))
     var deadCount = 0
     var aliveCount = 0
 
@@ -113,8 +115,8 @@ class FloorMap(
       //val stride = distance + distance * current(i).strideError
 
 
-      old(i).x = (current(i).x + particleStride * Math.cos(compassAngle)).toInt
-      old(i).y = (current(i).y + particleStride * Math.sin(compassAngle)).toInt
+      old(i).x = (current(i).x + particleStride * 1000 /*mm*/ * Math.cos(compassAngle)).toInt
+      old(i).y = (current(i).y + particleStride * 1000 /*mm*/ * Math.sin(compassAngle)).toInt
 
       var dead = false
 //      for(wall <- walls) {
