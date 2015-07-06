@@ -178,7 +178,7 @@ class FloorMap(
     val url = "http://mc.besuikerd.com:8000/"
 
     val sb = new StringBuilder()
-    current.foreach(p => sb.append(p.x + " " + p.y + "\n")) //TODO do properly
+    current.foreach(p => sb.append(p.x + " " + p.y + "\n"))
 
     Observable[Unit](sub => {
       try{
@@ -197,35 +197,7 @@ class FloorMap(
       }
       sub.onNext(())
       }).subscribeOn(ExecutionContextScheduler(global))
-//      .just(Http(url).postData(sb.toString()).header("content-type", "text/html").asString)
-//      .doOnEach(response => {
-//        try {
-//          val jArray = new JSONArray(response.body)
-//          val lb = ListBuffer[Cluster]()
-//          for (i <- 0 until jArray.length()) {
-//            val obj = jArray.getJSONObject(i)
-//            val cluster = Cluster(obj.getInt("x"), obj.getInt("y"), obj.getInt("covarX"), obj.getInt("covarY"), obj.getDouble("weight"))
-//            lb.append(cluster)
-//          }
-//          clusters = lb.sortBy(x => x.weight).toList
-//        } catch {
-//          case e => Log.d(TAG, "Exception while parsing json \n" + e)(
-//        }
-//      })
       .foreach(_ => subj.onNext(1))
-
-
-//    val response = Http(url).postData(sb.toString()).header("content-type", "text/html").asString
-//    try {
-//
-//      val jArray = new JSONArray(response.body)
-//      for (i <- 0 until jArray.length()) {
-//        val obj = jArray.getJSONObject(i)
-//        val cluster = Cluster(obj.getInt("x"), obj.getInt("y"), obj.getInt("covarX"), obj.getInt("covarY"), obj.getDouble("weight"))
-//      }
-//    } catch {
-//      case e => Log.d(TAG, "Exception while parsing json \n" + e)
-//    }
   }
 }
 
