@@ -153,7 +153,7 @@ class MotionModelActivity extends Activity
     case class MovementData(compass:Double, state:MotionState, tau:Double)
 
     val angleDiff = prefs.getString("angleOffset", "0").toDouble
-    val strideLength = prefs.getString("strideLength", "700").toInt
+    val strideMultiplier = prefs.getString("strideLength", "700").toInt
     val redrawSpeed = prefs.getString("redrawSpeed", "500").toInt
     val movementData = compass
       .observeOn(ExecutionContextScheduler(global))
@@ -173,7 +173,7 @@ class MotionModelActivity extends Activity
         while (angle > Math.PI) {
           angle -= 2 * Math.PI
         }
-        val executionTime = Timer.timed{floormap.move(data.tau, redrawSpeed, angle)}
+        val executionTime = Timer.timed{floormap.move(data.tau, redrawSpeed, angle, strideMultiplier)}
 
         Log.d(TAG, s"move took ${executionTime}ms")
       }

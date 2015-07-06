@@ -10,15 +10,15 @@
     <EditTextPreference
         android:key="strideLength"
         android:title="Stride Length"
-        android:numeric="decimal"
-        android:defaultValue="700"
+        android:inputType="numberSigned|numberDecimal"
+        android:defaultValue="1"
     />
 
     <EditTextPreference
         android:key="redrawSpeed"
         android:title="Redraw Speed"
         android:numeric="integer"
-        android:defaultValue="500"
+        android:defaultValue="1000"
         />
 
     <EditTextPreference

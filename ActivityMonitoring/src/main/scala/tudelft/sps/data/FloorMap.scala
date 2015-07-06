@@ -85,9 +85,10 @@ class FloorMap(
    *
    * @param distance length of stride in mm
    */
-  def move(tau:Double, redrawSpeed:Int, angle: Double) = {
+  def move(tau:Double, redrawSpeed:Int, angle: Double, extraStrideMultiplier:Int) = {
 
-    Log.d(TAG, "Moving..." + strideLengths.mkString("[", ", ", "]"))
+//    Log.d(TAG, "Moving..." + strideLengths.mkString("[", ", ", "]"))
+
     var deadCount = 0
     var aliveCount = 0
 
@@ -97,7 +98,7 @@ class FloorMap(
     val aliveStrides = ArrayBuffer[Double]()
 
 
-    val strideMultiplier =  (50 / tau) * redrawSpeed * 0.001
+    val strideMultiplier =  (50 / tau) * redrawSpeed * 0.001 * extraStrideMultiplier
 
     for (i <- current.indices) {
       //TODO paper says compass error should be Gaussian
