@@ -156,9 +156,9 @@ class MotionModelActivity extends Activity
     val strideMultiplier = prefs.getString("strideLength", "700").toInt
     val redrawSpeed = prefs.getString("redrawSpeed", "500").toInt
     val movementData = compass
-      .observeOn(ExecutionContextScheduler(global))
       .combineLatest(motionState)
       .combineLatest(tau)
+      .observeOn(ExecutionContextScheduler(global))
       .sample(redrawSpeed millis)
       .map(x => MovementData(x._1._1, x._1._2, x._2))
 
