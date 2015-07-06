@@ -2,18 +2,15 @@ package tudelft.sps.data
 
 import android.util.Log
 import org.json._
-import rx.lang.scala.{Subject, Observable}
+import rx.lang.scala.Observable
 import rx.lang.scala.schedulers.ExecutionContextScheduler
 import rx.lang.scala.subjects.PublishSubject
 import tudelft.sps.statistics.SeqExtensions.SeqMath
-import tudelft.sps.statistics.SeqExtensions.SeqMath._
 
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.concurrent.ExecutionContext.Implicits._
 import scalaj.http._
-import java.io.{IOException, OutputStreamWriter, FileOutputStream, File}
-import tudelft.sps.observable.ObservableExtensions
-import tudelft.sps.statistics.SeqExtensions.SeqMath._
+import java.io.{IOException}
 
 import scala.util.Random
 
@@ -96,8 +93,6 @@ class FloorMap(
     val aliveStrides = ArrayBuffer[Double]()
 
     for (i <- current.indices) {
-      //TODO paper says compass error should be Gaussian
-
       var compassAngle = angle + Math.PI * current(i).compassError
       while (compassAngle < -Math.PI) {
         compassAngle += 2 * Math.PI
@@ -119,11 +114,6 @@ class FloorMap(
       old(i).y = (current(i).y + particleStride * 1000 /*mm*/ * Math.sin(compassAngle)).toInt
 
       var dead = false
-//      for(wall <- walls) {
-//        if(wall.doLinesIntersect(old(i).x, current(i).x, old(i).y, current(i).y)) {
-//          dead = true
-//        }
-//      }
       if (walls.exists(wall => wall.doLinesIntersect(old(i).x, current(i).x, old(i).y, current(i).y))) {
         dead = true
       }
