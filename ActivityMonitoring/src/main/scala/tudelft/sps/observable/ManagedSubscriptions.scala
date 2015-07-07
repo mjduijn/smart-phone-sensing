@@ -22,8 +22,10 @@ trait ManagedSubscriptions extends Activity{
   }
 
   implicit class ManagedSubscriptionsObservableExtensions[A](obs:Observable[A]){
-    def subscribeRunning(onNext:A => Unit): Unit = {
-      runningSubscriptions += obs.subscribe(onNext)
+    def subscribeRunning(onNext:A => Unit): Subscription = {
+      val sub = obs.subscribe(onNext)
+      runningSubscriptions += sub
+      sub
     }
 
     def subscribeRunning(onNext:A => Unit, onError: Throwable => Unit): Unit = {

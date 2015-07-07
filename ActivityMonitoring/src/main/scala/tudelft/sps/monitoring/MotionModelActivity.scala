@@ -212,7 +212,7 @@ class MotionModelActivity extends Activity
     queueingTime
       .observeOn(UIThreadScheduler(this))
       .subscribeRunning{x =>
-        textQueuingTime.setText("avg=%.1fms\nstdev=%.1fms".format(x.average, x.stdev))
+        textQueuingTime.setText("total=%dms\navg=%.1fms\nstdev=%.1fms".format(x.serviceTimes.last - x.serviceTimes.head, x.average, x.stdev))
       }
   }
 }
